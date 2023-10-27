@@ -5,9 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class TangerineApiApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(TangerineApiApplication.class, args);
-    }
-
+  public static void main(String[] args) {
+    SpringApplication.run(TangerineApiApplication.class, args);
+  }
 }
