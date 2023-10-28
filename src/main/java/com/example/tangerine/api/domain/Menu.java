@@ -1,18 +1,18 @@
 package com.example.tangerine.api.domain;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.Hibernate;
@@ -37,8 +37,21 @@ public class Menu {
   @JoinColumn(name = "author_id", nullable = false)
   private User author;
 
-  @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<Recipe> recipes = new ArrayList<>();
+  @ManyToMany
+  @JoinTable(name = "menus_recipes",
+      joinColumns = @JoinColumn(name = "menu_id"),
+      inverseJoinColumns = @JoinColumn(name = "recipes_id"))
+  private Set<Recipe> recipes = new HashSet<>();
+
+  public void addRecipe(Recipe recipe) {
+    this.recipes.add(recipe);
+    recipe.getMenus().add(this);
+  }
+
+  public void removeRecipe(Recipe recipe) {
+    this.recipes.remove(recipe);
+    recipe.getMenus().remove(this);
+  }
 
   @Override
   public boolean equals(Object o) {
