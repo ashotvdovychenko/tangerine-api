@@ -6,12 +6,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.Hibernate;
@@ -47,8 +51,41 @@ public class User {
   @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Menu> menus = new ArrayList<>();
 
-  @ManyToMany(mappedBy = "users")
-  private List<Role> roles = new ArrayList<>();
+  @ManyToMany
+  @JoinTable(name = "users_roles",
+      joinColumns = @JoinColumn(name = "user_id"),
+      inverseJoinColumns = @JoinColumn(name = "roles_id"))
+  private Set<Role> roles = new HashSet<>();
+
+  public void addRecipe(Recipe recipe) {
+    this.recipes.add(recipe);
+    recipe.setAuthor(this);
+  }
+
+  public void removeRecipe(Recipe recipe) {
+    this.recipes.remove(recipe);
+    recipe.setAuthor(null);
+  }
+
+  public void addMenu(Menu menu) {
+    this.menus.add(menu);
+    menu.setAuthor(this);
+  }
+
+  public void removeMenu(Menu menu) {
+    this.menus.remove(menu);
+    menu.setAuthor(null);
+  }
+
+  public void addRole(Role role) {
+    this.roles.add(role);
+    role.getUsers().add(this);
+  }
+
+  public void removeRole(Role role) {
+    this.roles.remove(role);
+    role.getUsers().remove(this);
+  }
 
   @Override
   public boolean equals(Object o) {

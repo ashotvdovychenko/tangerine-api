@@ -8,10 +8,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.Hibernate;
@@ -52,9 +55,8 @@ public class Recipe {
   @JoinColumn(name = "author_id", nullable = false)
   private User author;
 
-  @ManyToOne(optional = false)
-  @JoinColumn(name = "menu_id", nullable = false)
-  private Menu menu;
+  @ManyToMany(mappedBy = "recipes")
+  private Set<Menu> menus = new LinkedHashSet<>();
 
   @Override
   public boolean equals(Object o) {
