@@ -2,21 +2,24 @@ package com.example.tangerine.api.service;
 
 import com.example.tangerine.api.domain.Menu;
 import com.example.tangerine.api.domain.Recipe;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 public interface MenuService {
-  Menu create(Menu menu);
+  Menu create(Menu menu, List<Long> recipeIndices);
 
   Menu update(Menu menu);
 
+  List<Menu> findAll();
+
   Optional<Menu> findById(Long menuId);
 
-  void addRecipe(Long menuId, Long recipeId);
+  void deleteById(Long menuId);
+
+  void addRecipes(Long menuId, List<Long> recipeIndices);
 
   Optional<Set<Recipe>> getRecipes(Long menuId);
 
-  Optional<Integer> getRecipesCount(Long menuId);
-
-  void deleteRecipe(Long menuId, Long recipeId);
+  void deleteRecipes(Long menuId, List<Long> recipeIndices);
 }
