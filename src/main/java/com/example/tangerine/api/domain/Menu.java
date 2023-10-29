@@ -10,7 +10,9 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import lombok.Getter;
@@ -30,11 +32,14 @@ public class Menu {
   @Column(name = "name")
   private String name;
 
+  @Column(name = "created_at")
+  private Instant createdAt = Instant.now();
+
   @Column(name = "picture_url")
   private String pictureUrl;
 
-  @ManyToOne(optional = false)
-  @JoinColumn(name = "author_id", nullable = false)
+  @ManyToOne
+  @JoinColumn(name = "author_id")
   private User author;
 
   @ManyToMany
@@ -51,6 +56,10 @@ public class Menu {
   public void removeRecipe(Recipe recipe) {
     this.recipes.remove(recipe);
     recipe.getMenus().remove(this);
+  }
+  
+  public void removeRecipes(List<Recipe> recipes) {
+    recipes.forEach(this::removeRecipe);
   }
 
   @Override

@@ -42,7 +42,7 @@ public class Recipe {
   private Long productsCost;
 
   @Column(name = "created_at")
-  private Instant createdAt;
+  private Instant createdAt = Instant.now();
 
   @Column(name = "picture_url")
   private String pictureUrl;
@@ -51,8 +51,8 @@ public class Recipe {
   @Column(name = "complexity")
   private Complexity complexity;
 
-  @ManyToOne(optional = false)
-  @JoinColumn(name = "author_id", nullable = false)
+  @ManyToOne
+  @JoinColumn(name = "author_id")
   private User author;
 
   @ManyToMany(mappedBy = "recipes")
