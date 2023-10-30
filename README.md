@@ -1,5 +1,8 @@
 # Tangerine API
 
+## Running
+To run this application execute `docker compose -f docker-compose.yml up`
+
 ## Checkstyle
 This project is fully compliant with Google Checks specifications.
 Read more [here](https://google.github.io/styleguide/javaguide.html).
