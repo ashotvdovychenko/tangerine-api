@@ -10,7 +10,7 @@ public class RecipeDto {
   private String description;
   private Long secondsDuration;
   private Long productsCost;
-  private String createdAt;
+  private Long createdAt;
   private Complexity complexity;
   private String pictureUrl;
   private Long authorId;

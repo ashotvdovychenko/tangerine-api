@@ -13,7 +13,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 @Mapper
 public interface RecipeMapper {
   @Mapping(target = "authorId", source = "author.id")
-  @Mapping(target = "createdAt", source = "createdAt", dateFormat = "dd-MM-yyyy HH:mm:ss")
+  @Mapping(target = "createdAt", expression = "java(recipe.getCreatedAt().getEpochSecond())")
   RecipeDto toPayload(Recipe recipe);
 
   Recipe toEntity(RecipeCreationDto recipeDto);
