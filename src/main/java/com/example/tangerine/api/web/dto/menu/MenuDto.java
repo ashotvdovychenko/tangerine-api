@@ -6,7 +6,7 @@ import lombok.Data;
 public class MenuDto {
   private Long id;
   private String name;
-  private String createdAt;
+  private Long createdAt;
   private String pictureUrl;
   private Long authorId;
 }

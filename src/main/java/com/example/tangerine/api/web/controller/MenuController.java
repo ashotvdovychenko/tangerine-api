@@ -11,7 +11,9 @@ import com.example.tangerine.api.web.mapper.RecipeMapper;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +23,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/menus")
@@ -51,10 +55,24 @@ public class MenuController {
             .map(recipeMapper::toPayload).toList()));
   }
 
+  @GetMapping("/{id}/picture")
+  public ResponseEntity<Resource> getPicture(@PathVariable Long id) {
+    return ResponseEntity.ok()
+        .contentType(MediaType.IMAGE_JPEG)
+        .body(menuService.getPicture(id));
+  }
+
   @PostMapping
   public ResponseEntity<MenuDto> create(@RequestBody MenuCreationDto menuDto) {
     var created = menuService.create(menuMapper.toEntity(menuDto), menuDto.getRecipeIndices());
     return new ResponseEntity<>(menuMapper.toPayload(created), HttpStatus.CREATED);
+  }
+
+  @PostMapping("/{id}/picture")
+  public ResponseEntity<String> uploadPicture(@PathVariable Long id,
+                                              @RequestParam MultipartFile file) {
+    var pictureKey = menuService.addPicture(id, file);
+    return new ResponseEntity<>(pictureKey, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{id}")
@@ -83,6 +101,13 @@ public class MenuController {
   public ResponseEntity<Void> deleteRecipes(@RequestBody MenuRecipesUpdateDto menuDto,
                                             @PathVariable Long id) {
     menuService.deleteRecipes(id, menuDto.getRecipesIndices());
+    return ResponseEntity.noContent().build();
+  }
+
+
+  @DeleteMapping("/{id}/picture")
+  public ResponseEntity<Void> deletePicture(@PathVariable Long id) {
+    menuService.deletePicture(id);
     return ResponseEntity.noContent().build();
   }
 }

@@ -10,7 +10,9 @@ import com.example.tangerine.api.web.mapper.RecipeMapper;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +21,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/recipes")
@@ -49,10 +53,24 @@ public class RecipeController {
             .map(menuMapper::toPayload).toList()));
   }
 
+  @GetMapping("/{id}/picture")
+  public ResponseEntity<Resource> getPicture(@PathVariable Long id) {
+    return ResponseEntity.ok()
+        .contentType(MediaType.IMAGE_JPEG)
+        .body(recipeService.getPicture(id));
+  }
+
   @PostMapping
   public ResponseEntity<RecipeDto> create(@RequestBody RecipeCreationDto recipeDto) {
     var created = recipeService.create(recipeMapper.toEntity(recipeDto));
     return new ResponseEntity<>(recipeMapper.toPayload(created), HttpStatus.CREATED);
+  }
+
+  @PostMapping("/{id}/picture")
+  public ResponseEntity<String> uploadPicture(@PathVariable Long id,
+                                              @RequestParam MultipartFile file) {
+    var pictureKey = recipeService.addPicture(id, file);
+    return new ResponseEntity<>(pictureKey, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{id}")
@@ -67,6 +85,12 @@ public class RecipeController {
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteById(@PathVariable Long id) {
     recipeService.deleteById(id);
+    return ResponseEntity.noContent().build();
+  }
+
+  @DeleteMapping("/{id}/picture")
+  public ResponseEntity<Void> deletePicture(@PathVariable Long id) {
+    recipeService.deletePicture(id);
     return ResponseEntity.noContent().build();
   }
 }

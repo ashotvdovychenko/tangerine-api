@@ -13,7 +13,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 @Mapper
 public interface MenuMapper {
   @Mapping(target = "authorId", source = "author.id")
-  @Mapping(target = "createdAt", source = "createdAt", dateFormat = "dd-MM-yyyy HH:mm:ss")
+  @Mapping(target = "createdAt", expression = "java(menu.getCreatedAt().getEpochSecond())")
   MenuDto toPayload(Menu menu);
 
   Menu toEntity(MenuCreationDto menuDto);
