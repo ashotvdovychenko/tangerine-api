@@ -19,7 +19,12 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Build with Maven
-        run: mvn -B install --file pom.xml -DskipTests
+        run: mvn -B install --file pom.xml
+        env:
+          spring_cloud_aws_credentials_access-key: ${{ secrets.AWS_ACCESS_KEY }}
+          spring_cloud_aws_credentials_secret-key: ${{ secrets.AWS_SECRET_KEY }}
+          spring_cloud_aws_region_static: ${{ secrets.AWS_REGION }}
+          aws_bucket: ${{ secrets.AWS_BUCKET }}
 
   checkstyle:
     runs-on: ubuntu-latest
