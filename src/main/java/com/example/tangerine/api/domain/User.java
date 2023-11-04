@@ -11,6 +11,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -44,6 +45,9 @@ public class User {
 
   @Column(name = "picture_url")
   private String pictureUrl;
+
+  @Column(name = "created_at")
+  private Instant createdAt = Instant.now();
 
   @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Recipe> recipes = new ArrayList<>();

@@ -3,10 +3,9 @@ package com.example.tangerine.api.web.dto.user;
 import lombok.Data;
 
 @Data
-public class UserDto {
-  private Long id;
+public class UserUpdateDto {
   private String username;
   private String email;
+  private String password;
   private String phoneNumber;
-  private Long createdAt;
 }

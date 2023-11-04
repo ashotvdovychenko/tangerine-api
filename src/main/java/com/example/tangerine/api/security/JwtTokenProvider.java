@@ -21,10 +21,11 @@ public class JwtTokenProvider {
   @Value("${jwt.issuer}")
   private String jwtIssuer;
 
-  public String generateToken(String username, List<Role> roles) {
+  public String generateToken(Long id, String username, List<Role> roles) {
     return JWT.create()
         .withIssuer(jwtIssuer)
         .withSubject(username)
+        .withClaim("id", id)
         .withClaim("roles", roles.stream().map(Role::getName).toList())
         .withExpiresAt(LocalDate.now()
             .plusDays(15)
