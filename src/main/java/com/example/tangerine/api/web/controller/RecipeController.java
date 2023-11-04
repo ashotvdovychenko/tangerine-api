@@ -7,6 +7,7 @@ import com.example.tangerine.api.web.dto.recipe.RecipeDto;
 import com.example.tangerine.api.web.dto.recipe.RecipeUpdateDto;
 import com.example.tangerine.api.web.mapper.MenuMapper;
 import com.example.tangerine.api.web.mapper.RecipeMapper;
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -61,21 +63,26 @@ public class RecipeController {
   }
 
   @PostMapping
-  public ResponseEntity<RecipeDto> create(@RequestBody RecipeCreationDto recipeDto) {
-    var created = recipeService.create(recipeMapper.toEntity(recipeDto));
+  public ResponseEntity<RecipeDto> create(@RequestBody RecipeCreationDto recipeDto,
+                                          Principal principal) {
+    var created = recipeService.create(recipeMapper.toEntity(recipeDto), principal.getName());
     return new ResponseEntity<>(recipeMapper.toPayload(created), HttpStatus.CREATED);
   }
 
   @PostMapping("/{id}/picture")
+  @PreAuthorize("@recipeChecker.check(#id, #principal.getName())")
   public ResponseEntity<String> uploadPicture(@PathVariable Long id,
-                                              @RequestParam MultipartFile file) {
+                                              @RequestParam MultipartFile file,
+                                              Principal principal) {
     var pictureKey = recipeService.addPicture(id, file);
     return new ResponseEntity<>(pictureKey, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{id}")
+  @PreAuthorize("@recipeChecker.check(#id, #principal.getName())")
   public ResponseEntity<RecipeDto> update(@RequestBody RecipeUpdateDto recipeDto,
-                                          @PathVariable Long id) {
+                                          @PathVariable Long id,
+                                          Principal principal) {
     return ResponseEntity.of(recipeService.findById(id)
         .map(menu -> recipeMapper.partialUpdate(recipeDto, menu))
         .map(recipeService::update)
@@ -83,13 +90,15 @@ public class RecipeController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+  @PreAuthorize("@recipeChecker.check(#id, #principal.getName()) or hasRole('ROLE_ADMIN')")
+  public ResponseEntity<Void> deleteById(@PathVariable Long id, Principal principal) {
     recipeService.deleteById(id);
     return ResponseEntity.noContent().build();
   }
 
   @DeleteMapping("/{id}/picture")
-  public ResponseEntity<Void> deletePicture(@PathVariable Long id) {
+  @PreAuthorize("@recipeChecker.check(#id, #principal.getName()) or hasRole('ROLE_ADMIN')")
+  public ResponseEntity<Void> deletePicture(@PathVariable Long id, Principal principal) {
     recipeService.deletePicture(id);
     return ResponseEntity.noContent().build();
   }

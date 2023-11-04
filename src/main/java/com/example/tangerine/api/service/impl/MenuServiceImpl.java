@@ -4,6 +4,7 @@ import com.example.tangerine.api.domain.Menu;
 import com.example.tangerine.api.domain.Recipe;
 import com.example.tangerine.api.repository.MenuRepository;
 import com.example.tangerine.api.repository.RecipeRepository;
+import com.example.tangerine.api.repository.UserRepository;
 import com.example.tangerine.api.service.MenuService;
 import java.io.IOException;
 import java.util.List;
@@ -27,10 +28,13 @@ public class MenuServiceImpl implements MenuService {
   private final AwsS3StorageService storageService;
   @Value("${aws.bucket}")
   private String bucket;
+  private final UserRepository userRepository;
 
   @Override
   @Transactional
-  public Menu create(Menu menu, List<Long> recipeIndices) {
+  public Menu create(Menu menu, List<Long> recipeIndices, String username) {
+    menu.setAuthor(userRepository.findByUsername(username)
+        .orElseThrow(IllegalArgumentException::new));
     StreamEx.of(recipeIndices)
         .mapPartial(recipeRepository::findById)
         .forEach(menu::addRecipe);
