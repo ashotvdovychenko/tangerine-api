@@ -9,7 +9,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface RecipeService {
-  Recipe create(Recipe recipe);
+  Recipe create(Recipe recipe, String username);
 
   Recipe update(Recipe recipe);
 

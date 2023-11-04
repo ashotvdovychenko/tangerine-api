@@ -1,10 +1,13 @@
 package com.example.tangerine.api.service;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.tangerine.api.domain.User;
 import java.util.Optional;
 
 public interface UserService {
-  User create(User user);
+  Optional<DecodedJWT> signIn(String username, String password);
+
+  User signUp(User user);
 
   User update(User user);
 

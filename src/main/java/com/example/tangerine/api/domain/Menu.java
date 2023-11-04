@@ -45,7 +45,7 @@ public class Menu {
   @ManyToMany
   @JoinTable(name = "menus_recipes",
       joinColumns = @JoinColumn(name = "menu_id"),
-      inverseJoinColumns = @JoinColumn(name = "recipes_id"))
+      inverseJoinColumns = @JoinColumn(name = "recipe_id"))
   private Set<Recipe> recipes = new HashSet<>();
 
   public void addRecipe(Recipe recipe) {
@@ -57,7 +57,7 @@ public class Menu {
     this.recipes.remove(recipe);
     recipe.getMenus().remove(this);
   }
-  
+
   public void removeRecipes(List<Recipe> recipes) {
     recipes.forEach(this::removeRecipe);
   }

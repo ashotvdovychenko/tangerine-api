@@ -9,7 +9,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface MenuService {
-  Menu create(Menu menu, List<Long> recipeIndices);
+  Menu create(Menu menu, List<Long> recipeIndices, String username);
 
   Menu update(Menu menu);
 

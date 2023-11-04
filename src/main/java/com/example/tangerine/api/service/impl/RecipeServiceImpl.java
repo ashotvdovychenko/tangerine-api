@@ -3,6 +3,7 @@ package com.example.tangerine.api.service.impl;
 import com.example.tangerine.api.domain.Menu;
 import com.example.tangerine.api.domain.Recipe;
 import com.example.tangerine.api.repository.RecipeRepository;
+import com.example.tangerine.api.repository.UserRepository;
 import com.example.tangerine.api.service.RecipeService;
 import java.io.IOException;
 import java.util.List;
@@ -21,12 +22,16 @@ import org.springframework.web.multipart.MultipartFile;
 public class RecipeServiceImpl implements RecipeService {
 
   private final RecipeRepository recipeRepository;
+  private final UserRepository userRepository;
   private final AwsS3StorageService storageService;
   @Value("${aws.bucket}")
   private String bucket;
 
   @Override
-  public Recipe create(Recipe recipe) {
+  @Transactional
+  public Recipe create(Recipe recipe, String username) {
+    recipe.setAuthor(userRepository.findByUsername(username)
+        .orElseThrow(IllegalArgumentException::new));
     return recipeRepository.save(recipe);
   }
 
