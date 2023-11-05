@@ -7,6 +7,7 @@ import com.example.tangerine.api.web.dto.recipe.RecipeDto;
 import com.example.tangerine.api.web.dto.recipe.RecipeUpdateDto;
 import com.example.tangerine.api.web.mapper.MenuMapper;
 import com.example.tangerine.api.web.mapper.RecipeMapper;
+import jakarta.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -63,7 +64,7 @@ public class RecipeController {
   }
 
   @PostMapping
-  public ResponseEntity<RecipeDto> create(@RequestBody RecipeCreationDto recipeDto,
+  public ResponseEntity<RecipeDto> create(@RequestBody @Valid RecipeCreationDto recipeDto,
                                           Principal principal) {
     var created = recipeService.create(recipeMapper.toEntity(recipeDto), principal.getName());
     return new ResponseEntity<>(recipeMapper.toPayload(created), HttpStatus.CREATED);
@@ -80,7 +81,7 @@ public class RecipeController {
 
   @PatchMapping("/{id}")
   @PreAuthorize("@recipeChecker.check(#id, #principal.getName())")
-  public ResponseEntity<RecipeDto> update(@RequestBody RecipeUpdateDto recipeDto,
+  public ResponseEntity<RecipeDto> update(@RequestBody @Valid RecipeUpdateDto recipeDto,
                                           @PathVariable Long id,
                                           Principal principal) {
     return ResponseEntity.of(recipeService.findById(id)
