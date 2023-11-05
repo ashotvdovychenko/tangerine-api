@@ -4,9 +4,15 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.tangerine.api.domain.Menu;
 import com.example.tangerine.api.domain.Recipe;
 import com.example.tangerine.api.domain.User;
+import com.example.tangerine.api.exception.ImageNotFoundException;
+import com.example.tangerine.api.exception.ImageUploadException;
+import com.example.tangerine.api.exception.InvalidPasswordException;
+import com.example.tangerine.api.exception.RoleNotFoundException;
+import com.example.tangerine.api.exception.UserNotFoundException;
 import com.example.tangerine.api.repository.RoleRepository;
 import com.example.tangerine.api.repository.UserRepository;
 import com.example.tangerine.api.security.JwtTokenProvider;
+import com.example.tangerine.api.service.StorageService;
 import com.example.tangerine.api.service.UserService;
 import java.io.IOException;
 import java.util.List;
@@ -28,7 +34,7 @@ public class UserServiceImpl implements UserService {
   private final JwtTokenProvider jwtTokenProvider;
   private final PasswordEncoder passwordEncoder;
   private final RoleRepository roleRepository;
-  private final AwsS3StorageService storageService;
+  private final StorageService storageService;
   @Value("${aws.bucket}")
   private String bucket;
 
@@ -36,10 +42,10 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public Optional<DecodedJWT> signIn(String username, String password) {
     var user = userRepository.findByUsername(username).orElseThrow(
-        () -> new IllegalArgumentException("USER NOT FOUND")
+        () -> new UserNotFoundException("User with username %s not found".formatted(username))
     );
     if (!passwordEncoder.matches(password, user.getPassword())) {
-      throw new IllegalArgumentException();
+      throw new InvalidPasswordException("Invalid password");
     }
     return jwtTokenProvider.toDecodedJWT(
         jwtTokenProvider.generateToken(user.getId(), username, List.copyOf(user.getRoles())));
@@ -49,7 +55,7 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public User signUp(User user) {
     user.addRole(roleRepository.findByName("ROLE_USER").orElseThrow(
-        () -> new IllegalArgumentException("ROLE NOT FOUND")
+        () -> new RoleNotFoundException("Role 'USER' not found. Failed to assign to new user")
     ));
     user.setPassword(passwordEncoder.encode(user.getPassword()));
     return userRepository.save(user);
@@ -67,8 +73,8 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public Optional<User> findById(Long id) {
-    return userRepository.findById(id);
+  public Optional<User> findById(Long userId) {
+    return userRepository.findById(userId);
   }
 
   @Override
@@ -78,14 +84,14 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @Transactional
-  public Optional<List<Recipe>> getRecipes(Long id) {
-    return userRepository.findById(id).map(User::getRecipes).map(List::copyOf);
+  public Optional<List<Recipe>> getRecipes(Long userId) {
+    return userRepository.findById(userId).map(User::getRecipes).map(List::copyOf);
   }
 
   @Override
   @Transactional
-  public Optional<List<Menu>> getMenus(Long id) {
-    return userRepository.findById(id).map(User::getMenus).map(List::copyOf);
+  public Optional<List<Menu>> getMenus(Long userId) {
+    return userRepository.findById(userId).map(User::getMenus).map(List::copyOf);
   }
 
   @Override
@@ -96,28 +102,31 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @Transactional
-  public String addPicture(Long id, MultipartFile file) {
-    if (!userRepository.existsById(id)) {
-      throw new IllegalArgumentException();
+  public String addPicture(Long userId, MultipartFile file) {
+    if (!userRepository.existsById(userId)) {
+      throw new UserNotFoundException("User with id %s not found".formatted(userId));
     }
     var pictureKey = UUID.randomUUID().toString();
     try {
       storageService.uploadPicture(
           file.getBytes(),
-          "user-images/%s/%s".formatted(id, pictureKey),
+          "user-images/%s/%s".formatted(userId, pictureKey),
           bucket);
     } catch (IOException e) {
-      throw new RuntimeException();
+      var fileName = file.getOriginalFilename();
+      throw new ImageUploadException("Failed to upload image %s".formatted(fileName));
     }
-    userRepository.updatePictureUrlById(id, pictureKey);
+    userRepository.updatePictureUrlById(userId, pictureKey);
     return pictureKey;
   }
 
   @Override
-  public Resource getPicture(Long id) {
-    var user = userRepository.findById(id).orElseThrow(IllegalArgumentException::new);
+  public Resource getPicture(Long userId) {
+    var user = userRepository.findById(userId).orElseThrow(
+        () -> new UserNotFoundException("User with id %s not found".formatted(userId))
+    );
     if (user.getPictureUrl() == null || user.getPictureUrl().isBlank()) {
-      throw new IllegalArgumentException();
+      throw new ImageNotFoundException("Image of user with id %s not found".formatted(userId));
     }
     return storageService.findByKey(
         "user-images/%s/%s".formatted(user.getId(), user.getPictureUrl()),
@@ -126,8 +135,10 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @Transactional
-  public void deletePicture(Long id) {
-    var user = userRepository.findById(id).orElseThrow(IllegalArgumentException::new);
+  public void deletePicture(Long userId) {
+    var user = userRepository.findById(userId).orElseThrow(
+        () -> new UserNotFoundException("User with id %s not found".formatted(userId))
+    );
     if (user.getPictureUrl() != null) {
       storageService.deleteByKey(
           "user-images/%s/%s".formatted(user.getId(), user.getPictureUrl()),

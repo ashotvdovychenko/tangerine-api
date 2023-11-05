@@ -1,6 +1,7 @@
 package com.example.tangerine.api.security;
 
 import com.example.tangerine.api.domain.Role;
+import com.example.tangerine.api.exception.UserNotFoundException;
 import com.example.tangerine.api.repository.UserRepository;
 import java.util.Collection;
 import java.util.Set;
@@ -24,7 +25,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
   @Transactional
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
     var user = userRepository.findByUsername(username).orElseThrow(
-        () -> new UsernameNotFoundException("User with username %s not found".formatted(username))
+        () -> new UserNotFoundException("User with username %s not found".formatted(username))
     );
     return new UserDetailsImpl(user, mapRoles(user.getRoles()));
   }
