@@ -2,9 +2,14 @@ package com.example.tangerine.api.service.impl;
 
 import com.example.tangerine.api.domain.Menu;
 import com.example.tangerine.api.domain.Recipe;
+import com.example.tangerine.api.exception.ImageNotFoundException;
+import com.example.tangerine.api.exception.ImageUploadException;
+import com.example.tangerine.api.exception.RecipeNotFoundException;
+import com.example.tangerine.api.exception.UserNotFoundException;
 import com.example.tangerine.api.repository.RecipeRepository;
 import com.example.tangerine.api.repository.UserRepository;
 import com.example.tangerine.api.service.RecipeService;
+import com.example.tangerine.api.service.StorageService;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +28,7 @@ public class RecipeServiceImpl implements RecipeService {
 
   private final RecipeRepository recipeRepository;
   private final UserRepository userRepository;
-  private final AwsS3StorageService storageService;
+  private final StorageService storageService;
   @Value("${aws.bucket}")
   private String bucket;
 
@@ -31,7 +36,8 @@ public class RecipeServiceImpl implements RecipeService {
   @Transactional
   public Recipe create(Recipe recipe, String username) {
     recipe.setAuthor(userRepository.findByUsername(username)
-        .orElseThrow(IllegalArgumentException::new));
+        .orElseThrow(() -> new UserNotFoundException(
+            "User with username %s not found".formatted(username))));
     return recipeRepository.save(recipe);
   }
 
@@ -65,7 +71,7 @@ public class RecipeServiceImpl implements RecipeService {
   @Transactional
   public String addPicture(Long recipeId, MultipartFile file) {
     if (!recipeRepository.existsById(recipeId)) {
-      throw new IllegalArgumentException();
+      throw new RecipeNotFoundException("Recipe with id %s not found".formatted(recipeId));
     }
     var pictureKey = UUID.randomUUID().toString();
     try {
@@ -74,7 +80,8 @@ public class RecipeServiceImpl implements RecipeService {
           "recipe-images/%s/%s".formatted(recipeId, pictureKey),
           bucket);
     } catch (IOException e) {
-      throw new RuntimeException();
+      var fileName = file.getOriginalFilename();
+      throw new ImageUploadException("Failed to upload image %s".formatted(fileName));
     }
     recipeRepository.updatePictureUrlById(recipeId, pictureKey);
     return pictureKey;
@@ -82,9 +89,10 @@ public class RecipeServiceImpl implements RecipeService {
 
   @Override
   public Resource getPicture(Long recipeId) {
-    var recipe = recipeRepository.findById(recipeId).orElseThrow(IllegalArgumentException::new);
+    var recipe = recipeRepository.findById(recipeId).orElseThrow(
+        () -> new RecipeNotFoundException("Recipe with id %s not found".formatted(recipeId)));
     if (recipe.getPictureUrl() == null || recipe.getPictureUrl().isBlank()) {
-      throw new IllegalArgumentException();
+      throw new ImageNotFoundException("Image of recipe with id %s not found".formatted(recipeId));
     }
     return storageService.findByKey(
         "recipe-images/%s/%s".formatted(recipeId, recipe.getPictureUrl()),
@@ -94,7 +102,8 @@ public class RecipeServiceImpl implements RecipeService {
   @Override
   @Transactional
   public void deletePicture(Long recipeId) {
-    var recipe = recipeRepository.findById(recipeId).orElseThrow(IllegalArgumentException::new);
+    var recipe = recipeRepository.findById(recipeId).orElseThrow(
+        () -> new RecipeNotFoundException("Recipe with id %s not found".formatted(recipeId)));
     if (recipe.getPictureUrl() != null) {
       storageService.deleteByKey(
           "recipe-images/%s/%s".formatted(recipeId, recipe.getPictureUrl()),

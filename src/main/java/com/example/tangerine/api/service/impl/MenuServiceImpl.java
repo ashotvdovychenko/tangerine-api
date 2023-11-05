@@ -2,10 +2,15 @@ package com.example.tangerine.api.service.impl;
 
 import com.example.tangerine.api.domain.Menu;
 import com.example.tangerine.api.domain.Recipe;
+import com.example.tangerine.api.exception.ImageNotFoundException;
+import com.example.tangerine.api.exception.ImageUploadException;
+import com.example.tangerine.api.exception.MenuNotFoundException;
+import com.example.tangerine.api.exception.UserNotFoundException;
 import com.example.tangerine.api.repository.MenuRepository;
 import com.example.tangerine.api.repository.RecipeRepository;
 import com.example.tangerine.api.repository.UserRepository;
 import com.example.tangerine.api.service.MenuService;
+import com.example.tangerine.api.service.StorageService;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +30,7 @@ public class MenuServiceImpl implements MenuService {
 
   private final MenuRepository menuRepository;
   private final RecipeRepository recipeRepository;
-  private final AwsS3StorageService storageService;
+  private final StorageService storageService;
   @Value("${aws.bucket}")
   private String bucket;
   private final UserRepository userRepository;
@@ -34,7 +39,8 @@ public class MenuServiceImpl implements MenuService {
   @Transactional
   public Menu create(Menu menu, List<Long> recipeIndices, String username) {
     menu.setAuthor(userRepository.findByUsername(username)
-        .orElseThrow(IllegalArgumentException::new));
+        .orElseThrow(() -> new UserNotFoundException(
+            "User with username %s not found".formatted(username))));
     StreamEx.of(recipeIndices)
         .mapPartial(recipeRepository::findById)
         .forEach(menu::addRecipe);
@@ -64,7 +70,9 @@ public class MenuServiceImpl implements MenuService {
   @Override
   @Transactional
   public void addRecipes(Long menuId, List<Long> recipeIndices) {
-    var menu = menuRepository.findById(menuId).orElseThrow(IllegalArgumentException::new);
+    var menu = menuRepository.findById(menuId).orElseThrow(
+        () -> new MenuNotFoundException("Menu with id %s not found".formatted(menuId))
+    );
     StreamEx.of(recipeIndices)
         .mapPartial(recipeRepository::findById)
         .forEach(menu::addRecipe);
@@ -89,7 +97,7 @@ public class MenuServiceImpl implements MenuService {
   @Transactional
   public String addPicture(Long menuId, MultipartFile file) {
     if (!menuRepository.existsById(menuId)) {
-      throw new IllegalArgumentException();
+      throw new MenuNotFoundException("Menu with id %s not found".formatted(menuId));
     }
     var pictureKey = UUID.randomUUID().toString();
     try {
@@ -98,7 +106,8 @@ public class MenuServiceImpl implements MenuService {
           "menu-images/%s/%s".formatted(menuId, pictureKey),
           bucket);
     } catch (IOException e) {
-      throw new RuntimeException();
+      var fileName = file.getOriginalFilename();
+      throw new ImageUploadException("Failed to upload image %s".formatted(fileName));
     }
     menuRepository.updatePictureUrlById(menuId, pictureKey);
     return pictureKey;
@@ -106,9 +115,11 @@ public class MenuServiceImpl implements MenuService {
 
   @Override
   public Resource getPicture(Long menuId) {
-    var menu = menuRepository.findById(menuId).orElseThrow(IllegalArgumentException::new);
+    var menu = menuRepository.findById(menuId).orElseThrow(
+        () -> new MenuNotFoundException("Menu with id %s not found".formatted(menuId))
+    );
     if (menu.getPictureUrl() == null || menu.getPictureUrl().isBlank()) {
-      throw new IllegalArgumentException();
+      throw new ImageNotFoundException("Image of menu with id %s not found".formatted(menuId));
     }
     return storageService.findByKey(
         "menu-images/%s/%s".formatted(menuId, menu.getPictureUrl()),
@@ -118,7 +129,9 @@ public class MenuServiceImpl implements MenuService {
   @Override
   @Transactional
   public void deletePicture(Long menuId) {
-    var menu = menuRepository.findById(menuId).orElseThrow(IllegalArgumentException::new);
+    var menu = menuRepository.findById(menuId).orElseThrow(
+        () -> new MenuNotFoundException("Menu with id %s not found".formatted(menuId))
+    );
     if (menu.getPictureUrl() != null) {
       storageService.deleteByKey(
           "menu-images/%s/%s".formatted(menuId, menu.getPictureUrl()),
