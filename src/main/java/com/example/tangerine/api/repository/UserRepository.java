@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends JpaRepository<User, Long> {
   Optional<User> findByUsername(String username);
 
+  boolean existsByUsername(String username);
+
   @Modifying
   @Query("UPDATE User u SET u.pictureUrl = :pictureUrl where u.id = :id")
   void updatePictureUrlById(Long id, String pictureUrl);

@@ -6,6 +6,7 @@ import com.example.tangerine.api.exception.InvalidPasswordException;
 import com.example.tangerine.api.exception.MenuNotFoundException;
 import com.example.tangerine.api.exception.RecipeNotFoundException;
 import com.example.tangerine.api.exception.RoleNotFoundException;
+import com.example.tangerine.api.exception.UserAlreadyExistsException;
 import com.example.tangerine.api.exception.UserNotFoundException;
 import com.example.tangerine.api.web.dto.ExceptionResponse;
 import java.time.LocalDateTime;
@@ -26,7 +27,8 @@ public class TangerineApiControllerAdvice {
 
   @ExceptionHandler({
       ImageUploadException.class,
-      HttpMessageNotReadableException.class
+      HttpMessageNotReadableException.class,
+      UserAlreadyExistsException.class
   })
   public ResponseEntity<ExceptionResponse> handleBadRequest(RuntimeException exception) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
