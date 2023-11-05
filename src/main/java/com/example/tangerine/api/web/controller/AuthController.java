@@ -8,6 +8,7 @@ import com.example.tangerine.api.web.dto.user.UserDto;
 import com.example.tangerine.api.web.mapper.JwtTokenMapper;
 import com.example.tangerine.api.web.mapper.UserMapper;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,13 +29,13 @@ public class AuthController {
   private final JwtTokenMapper jwtTokenMapper;
 
   @PostMapping("/sign-up")
-  public ResponseEntity<UserDto> signUp(@RequestBody UserCreationDto userDto) {
+  public ResponseEntity<UserDto> signUp(@RequestBody @Valid UserCreationDto userDto) {
     var newUser = userService.signUp(userMapper.toEntity(userDto));
     return new ResponseEntity<>(userMapper.toPayload(newUser), HttpStatus.CREATED);
   }
 
   @PostMapping("/sign-in")
-  public ResponseEntity<JwtToken> signIn(@RequestBody Credentials credentials) {
+  public ResponseEntity<JwtToken> signIn(@RequestBody @Valid Credentials credentials) {
     return ResponseEntity.of(userService
         .signIn(credentials.getUsername(), credentials.getPassword())
         .map(jwtTokenMapper::toPayload));

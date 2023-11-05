@@ -8,6 +8,7 @@ import com.example.tangerine.api.web.dto.user.UserUpdateDto;
 import com.example.tangerine.api.web.mapper.MenuMapper;
 import com.example.tangerine.api.web.mapper.RecipeMapper;
 import com.example.tangerine.api.web.mapper.UserMapper;
+import jakarta.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -81,7 +82,7 @@ public class UserController {
 
   @PatchMapping("/{id}")
   @PreAuthorize("@userChecker.check(#id, #principal.getName())")
-  public ResponseEntity<UserDto> update(@RequestBody UserUpdateDto userDto,
+  public ResponseEntity<UserDto> update(@RequestBody @Valid UserUpdateDto userDto,
                                         @PathVariable Long id, Principal principal) {
     return ResponseEntity.of(userService.findById(id)
         .map(user -> userMapper.partialUpdate(userDto, user))

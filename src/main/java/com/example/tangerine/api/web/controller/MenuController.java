@@ -8,6 +8,7 @@ import com.example.tangerine.api.web.dto.menu.MenuUpdateDto;
 import com.example.tangerine.api.web.dto.recipe.RecipeDto;
 import com.example.tangerine.api.web.mapper.MenuMapper;
 import com.example.tangerine.api.web.mapper.RecipeMapper;
+import jakarta.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -65,7 +66,8 @@ public class MenuController {
   }
 
   @PostMapping
-  public ResponseEntity<MenuDto> create(@RequestBody MenuCreationDto menuDto, Principal principal) {
+  public ResponseEntity<MenuDto> create(@RequestBody @Valid MenuCreationDto menuDto,
+                                        Principal principal) {
     var created = menuService.create(menuMapper.toEntity(menuDto),
         menuDto.getRecipeIndices(), principal.getName());
     return new ResponseEntity<>(menuMapper.toPayload(created), HttpStatus.CREATED);
@@ -82,7 +84,7 @@ public class MenuController {
 
   @PatchMapping("/{id}")
   @PreAuthorize("@menuChecker.check(#id, #principal.getName())")
-  public ResponseEntity<MenuDto> update(@RequestBody MenuUpdateDto menuDto,
+  public ResponseEntity<MenuDto> update(@RequestBody @Valid MenuUpdateDto menuDto,
                                         @PathVariable Long id, Principal principal) {
     return ResponseEntity.of(menuService.findById(id)
         .map(menu -> menuMapper.partialUpdate(menuDto, menu))
@@ -92,7 +94,7 @@ public class MenuController {
 
   @PutMapping("/{id}/recipes")
   @PreAuthorize("@menuChecker.check(#id, #principal.getName())")
-  public ResponseEntity<Void> addRecipes(@RequestBody MenuRecipesUpdateDto menuDto,
+  public ResponseEntity<Void> addRecipes(@RequestBody @Valid MenuRecipesUpdateDto menuDto,
                                          @PathVariable Long id, Principal principal) {
     menuService.addRecipes(id, menuDto.getRecipesIndices());
     return ResponseEntity.ok().build();
@@ -107,7 +109,7 @@ public class MenuController {
 
   @DeleteMapping("/{id}/recipes")
   @PreAuthorize("@menuChecker.check(#id, #principal.getName())")
-  public ResponseEntity<Void> deleteRecipes(@RequestBody MenuRecipesUpdateDto menuDto,
+  public ResponseEntity<Void> deleteRecipes(@RequestBody @Valid MenuRecipesUpdateDto menuDto,
                                             @PathVariable Long id, Principal principal) {
     menuService.deleteRecipes(id, menuDto.getRecipesIndices());
     return ResponseEntity.noContent().build();
