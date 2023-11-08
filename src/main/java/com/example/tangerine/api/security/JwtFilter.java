@@ -2,6 +2,8 @@ package com.example.tangerine.api.security;
 
 import static org.springframework.util.StringUtils.hasText;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +20,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 @RequiredArgsConstructor
+@SecurityScheme(name = "bearer_token", type = SecuritySchemeType.HTTP, scheme = "bearer",
+    description = "Enter the token given after successful POST /auth/sign-in",
+    bearerFormat = "JWT")
 public class JwtFilter extends OncePerRequestFilter {
 
   private final JwtTokenProvider jwtProvider;
