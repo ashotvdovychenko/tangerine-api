@@ -8,5 +8,6 @@ public class UserDto {
   private String username;
   private String email;
   private String phoneNumber;
+  private String imageKey;
   private Long createdAt;
 }

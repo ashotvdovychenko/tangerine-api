@@ -113,13 +113,13 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @Transactional
-  public String addPicture(Long userId, MultipartFile file) {
+  public String addImage(Long userId, MultipartFile file) {
     if (!userRepository.existsById(userId)) {
       throw new UserNotFoundException("User with id %s not found".formatted(userId));
     }
     var pictureKey = UUID.randomUUID().toString();
     try {
-      storageService.uploadPicture(
+      storageService.uploadImage(
           file.getBytes(),
           "user-images/%s/%s".formatted(userId, pictureKey),
           bucket);
@@ -127,35 +127,35 @@ public class UserServiceImpl implements UserService {
       var fileName = file.getOriginalFilename();
       throw new ImageUploadException("Failed to upload image %s".formatted(fileName));
     }
-    userRepository.updatePictureUrlById(userId, pictureKey);
+    userRepository.updateImageKeyById(userId, pictureKey);
     return pictureKey;
   }
 
   @Override
-  public Resource getPicture(Long userId) {
+  public Resource getImage(Long userId) {
     var user = userRepository.findById(userId).orElseThrow(
         () -> new UserNotFoundException("User with id %s not found".formatted(userId))
     );
-    if (user.getPictureUrl() == null || user.getPictureUrl().isBlank()) {
+    if (user.getImageKey() == null || user.getImageKey().isBlank()) {
       throw new ImageNotFoundException("Image of user with id %s not found".formatted(userId));
     }
     return storageService.findByKey(
-        "user-images/%s/%s".formatted(user.getId(), user.getPictureUrl()),
+        "user-images/%s/%s".formatted(user.getId(), user.getImageKey()),
         bucket);
   }
 
   @Override
   @Transactional
-  public void deletePicture(Long userId) {
+  public void deleteImage(Long userId) {
     var user = userRepository.findById(userId).orElseThrow(
         () -> new UserNotFoundException("User with id %s not found".formatted(userId))
     );
-    if (user.getPictureUrl() != null) {
+    if (user.getImageKey() != null) {
       storageService.deleteByKey(
-          "user-images/%s/%s".formatted(user.getId(), user.getPictureUrl()),
+          "user-images/%s/%s".formatted(user.getId(), user.getImageKey()),
           bucket
       );
-      user.setPictureUrl(null);
+      user.setImageKey(null);
     }
   }
 

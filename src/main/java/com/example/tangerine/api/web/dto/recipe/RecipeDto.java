@@ -12,6 +12,6 @@ public class RecipeDto {
   private Long productsCost;
   private Long createdAt;
   private Complexity complexity;
-  private String pictureUrl;
+  private String imageKey;
   private Long authorId;
 }

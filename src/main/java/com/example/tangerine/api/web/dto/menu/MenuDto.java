@@ -7,6 +7,6 @@ public class MenuDto {
   private Long id;
   private String name;
   private Long createdAt;
-  private String pictureUrl;
+  private String imageKey;
   private Long authorId;
 }

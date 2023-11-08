@@ -18,7 +18,7 @@ public class AwsS3StorageService implements StorageService {
   private final S3Client client;
 
   @Override
-  public void uploadPicture(byte[] file, String objectKey, String bucket) {
+  public void uploadImage(byte[] file, String objectKey, String bucket) {
     var request = PutObjectRequest.builder()
         .bucket(bucket)
         .key(objectKey)

@@ -44,8 +44,8 @@ public class Recipe {
   @Column(name = "created_at")
   private Instant createdAt = Instant.now();
 
-  @Column(name = "picture_url")
-  private String pictureUrl;
+  @Column(name = "image_key")
+  private String imageKey;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "complexity")

@@ -43,8 +43,8 @@ public class User {
   @Column(name = "phone_number")
   private String phoneNumber;
 
-  @Column(name = "picture_url")
-  private String pictureUrl;
+  @Column(name = "image_key")
+  private String imageKey;
 
   @Column(name = "created_at")
   private Instant createdAt = Instant.now();

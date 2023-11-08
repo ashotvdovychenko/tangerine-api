@@ -80,7 +80,7 @@ public class RecipeController {
             .map(menuMapper::toPayload).toList()));
   }
 
-  @GetMapping("/{id}/picture")
+  @GetMapping("/{id}/image")
   @Operation(summary = "Get image of recipe", responses = {
       @ApiResponse(responseCode = "200",
           content = @Content(mediaType = MediaType.IMAGE_JPEG_VALUE)),
@@ -88,10 +88,10 @@ public class RecipeController {
           content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ExceptionResponse.class)))
   })
-  public ResponseEntity<Resource> getPicture(@PathVariable Long id) {
+  public ResponseEntity<Resource> getImage(@PathVariable Long id) {
     return ResponseEntity.ok()
         .contentType(MediaType.IMAGE_JPEG)
-        .body(recipeService.getPicture(id));
+        .body(recipeService.getImage(id));
   }
 
   @PostMapping
@@ -112,7 +112,7 @@ public class RecipeController {
     return new ResponseEntity<>(recipeMapper.toPayload(created), HttpStatus.CREATED);
   }
 
-  @PostMapping(value = "/{id}/picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PostMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @PreAuthorize("@recipeChecker.check(#id, #principal.getName())")
   @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Add image to recipe", responses = {
@@ -127,11 +127,11 @@ public class RecipeController {
           content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ExceptionResponse.class)))
   })
-  public ResponseEntity<String> uploadPicture(@PathVariable Long id,
+  public ResponseEntity<String> uploadImage(@PathVariable Long id,
                                               @RequestPart MultipartFile file,
                                               Principal principal) {
-    var pictureKey = recipeService.addPicture(id, file);
-    return new ResponseEntity<>(pictureKey, HttpStatus.CREATED);
+    var imageKey = recipeService.addImage(id, file);
+    return new ResponseEntity<>(imageKey, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{id}")
@@ -168,7 +168,7 @@ public class RecipeController {
     return ResponseEntity.noContent().build();
   }
 
-  @DeleteMapping("/{id}/picture")
+  @DeleteMapping("/{id}/image")
   @PreAuthorize("@recipeChecker.check(#id, #principal.getName()) or hasRole('ROLE_ADMIN')")
   @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Delete image of recipe", responses = {
@@ -178,8 +178,8 @@ public class RecipeController {
           content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ExceptionResponse.class)))
   })
-  public ResponseEntity<Void> deletePicture(@PathVariable Long id, Principal principal) {
-    recipeService.deletePicture(id);
+  public ResponseEntity<Void> deleteImage(@PathVariable Long id, Principal principal) {
+    recipeService.deleteImage(id);
     return ResponseEntity.noContent().build();
   }
 }

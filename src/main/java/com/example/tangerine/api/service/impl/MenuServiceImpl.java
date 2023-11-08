@@ -95,13 +95,13 @@ public class MenuServiceImpl implements MenuService {
 
   @Override
   @Transactional
-  public String addPicture(Long menuId, MultipartFile file) {
+  public String addImage(Long menuId, MultipartFile file) {
     if (!menuRepository.existsById(menuId)) {
       throw new MenuNotFoundException("Menu with id %s not found".formatted(menuId));
     }
     var pictureKey = UUID.randomUUID().toString();
     try {
-      storageService.uploadPicture(
+      storageService.uploadImage(
           file.getBytes(),
           "menu-images/%s/%s".formatted(menuId, pictureKey),
           bucket);
@@ -109,35 +109,35 @@ public class MenuServiceImpl implements MenuService {
       var fileName = file.getOriginalFilename();
       throw new ImageUploadException("Failed to upload image %s".formatted(fileName));
     }
-    menuRepository.updatePictureUrlById(menuId, pictureKey);
+    menuRepository.updateImageKeyById(menuId, pictureKey);
     return pictureKey;
   }
 
   @Override
-  public Resource getPicture(Long menuId) {
+  public Resource getImage(Long menuId) {
     var menu = menuRepository.findById(menuId).orElseThrow(
         () -> new MenuNotFoundException("Menu with id %s not found".formatted(menuId))
     );
-    if (menu.getPictureUrl() == null || menu.getPictureUrl().isBlank()) {
+    if (menu.getImageKey() == null || menu.getImageKey().isBlank()) {
       throw new ImageNotFoundException("Image of menu with id %s not found".formatted(menuId));
     }
     return storageService.findByKey(
-        "menu-images/%s/%s".formatted(menuId, menu.getPictureUrl()),
+        "menu-images/%s/%s".formatted(menuId, menu.getImageKey()),
         bucket);
   }
 
   @Override
   @Transactional
-  public void deletePicture(Long menuId) {
+  public void deleteImage(Long menuId) {
     var menu = menuRepository.findById(menuId).orElseThrow(
         () -> new MenuNotFoundException("Menu with id %s not found".formatted(menuId))
     );
-    if (menu.getPictureUrl() != null) {
+    if (menu.getImageKey() != null) {
       storageService.deleteByKey(
-          "menu-images/%s/%s".formatted(menuId, menu.getPictureUrl()),
+          "menu-images/%s/%s".formatted(menuId, menu.getImageKey()),
           bucket
       );
-      menu.setPictureUrl(null);
+      menu.setImageKey(null);
     }
   }
 }

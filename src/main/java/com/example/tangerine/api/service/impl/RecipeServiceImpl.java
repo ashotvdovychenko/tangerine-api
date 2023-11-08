@@ -69,13 +69,13 @@ public class RecipeServiceImpl implements RecipeService {
 
   @Override
   @Transactional
-  public String addPicture(Long recipeId, MultipartFile file) {
+  public String addImage(Long recipeId, MultipartFile file) {
     if (!recipeRepository.existsById(recipeId)) {
       throw new RecipeNotFoundException("Recipe with id %s not found".formatted(recipeId));
     }
     var pictureKey = UUID.randomUUID().toString();
     try {
-      storageService.uploadPicture(
+      storageService.uploadImage(
           file.getBytes(),
           "recipe-images/%s/%s".formatted(recipeId, pictureKey),
           bucket);
@@ -83,33 +83,33 @@ public class RecipeServiceImpl implements RecipeService {
       var fileName = file.getOriginalFilename();
       throw new ImageUploadException("Failed to upload image %s".formatted(fileName));
     }
-    recipeRepository.updatePictureUrlById(recipeId, pictureKey);
+    recipeRepository.updateImageKeyById(recipeId, pictureKey);
     return pictureKey;
   }
 
   @Override
-  public Resource getPicture(Long recipeId) {
+  public Resource getImage(Long recipeId) {
     var recipe = recipeRepository.findById(recipeId).orElseThrow(
         () -> new RecipeNotFoundException("Recipe with id %s not found".formatted(recipeId)));
-    if (recipe.getPictureUrl() == null || recipe.getPictureUrl().isBlank()) {
+    if (recipe.getImageKey() == null || recipe.getImageKey().isBlank()) {
       throw new ImageNotFoundException("Image of recipe with id %s not found".formatted(recipeId));
     }
     return storageService.findByKey(
-        "recipe-images/%s/%s".formatted(recipeId, recipe.getPictureUrl()),
+        "recipe-images/%s/%s".formatted(recipeId, recipe.getImageKey()),
         bucket);
   }
 
   @Override
   @Transactional
-  public void deletePicture(Long recipeId) {
+  public void deleteImage(Long recipeId) {
     var recipe = recipeRepository.findById(recipeId).orElseThrow(
         () -> new RecipeNotFoundException("Recipe with id %s not found".formatted(recipeId)));
-    if (recipe.getPictureUrl() != null) {
+    if (recipe.getImageKey() != null) {
       storageService.deleteByKey(
-          "recipe-images/%s/%s".formatted(recipeId, recipe.getPictureUrl()),
+          "recipe-images/%s/%s".formatted(recipeId, recipe.getImageKey()),
           bucket
       );
-      recipe.setPictureUrl(null);
+      recipe.setImageKey(null);
     }
   }
 }
