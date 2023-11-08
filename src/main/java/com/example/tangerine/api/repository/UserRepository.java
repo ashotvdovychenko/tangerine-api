@@ -14,6 +14,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
   boolean existsByUsername(String username);
 
   @Modifying
-  @Query("UPDATE User u SET u.pictureUrl = :pictureUrl where u.id = :id")
-  void updatePictureUrlById(Long id, String pictureUrl);
+  @Query("UPDATE User u SET u.imageKey = :imageKey where u.id = :id")
+  void updateImageKeyById(Long id, String imageKey);
 }

@@ -82,7 +82,7 @@ public class MenuController {
             .map(recipeMapper::toPayload).toList()));
   }
 
-  @GetMapping("/{id}/picture")
+  @GetMapping("/{id}/image")
   @Operation(summary = "Get image of menu", responses = {
       @ApiResponse(responseCode = "200",
           content = @Content(mediaType = MediaType.IMAGE_JPEG_VALUE)),
@@ -90,10 +90,10 @@ public class MenuController {
           content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ExceptionResponse.class)))
   })
-  public ResponseEntity<Resource> getPicture(@PathVariable Long id) {
+  public ResponseEntity<Resource> getImage(@PathVariable Long id) {
     return ResponseEntity.ok()
         .contentType(MediaType.IMAGE_JPEG)
-        .body(menuService.getPicture(id));
+        .body(menuService.getImage(id));
   }
 
   @PostMapping
@@ -115,7 +115,7 @@ public class MenuController {
     return new ResponseEntity<>(menuMapper.toPayload(created), HttpStatus.CREATED);
   }
 
-  @PostMapping(value = "/{id}/picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PostMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @PreAuthorize("@menuChecker.check(#id, #principal.getName())")
   @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Add image of menu by id", responses = {
@@ -130,11 +130,11 @@ public class MenuController {
           content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ExceptionResponse.class)))
   })
-  public ResponseEntity<String> uploadPicture(@PathVariable Long id,
-                                              @RequestPart MultipartFile file,
-                                              Principal principal) {
-    var pictureKey = menuService.addPicture(id, file);
-    return new ResponseEntity<>(pictureKey, HttpStatus.CREATED);
+  public ResponseEntity<String> uploadImage(@PathVariable Long id,
+                                            @RequestPart MultipartFile file,
+                                            Principal principal) {
+    var imageKey = menuService.addImage(id, file);
+    return new ResponseEntity<>(imageKey, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{id}")
@@ -206,7 +206,7 @@ public class MenuController {
   }
 
 
-  @DeleteMapping("/{id}/picture")
+  @DeleteMapping("/{id}/image")
   @PreAuthorize("@menuChecker.check(#id, #principal.getName()) or hasRole('ROLE_ADMIN')")
   @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Delete image of menu by id", responses = {
@@ -216,8 +216,8 @@ public class MenuController {
           content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ExceptionResponse.class)))
   })
-  public ResponseEntity<Void> deletePicture(@PathVariable Long id, Principal principal) {
-    menuService.deletePicture(id);
+  public ResponseEntity<Void> deleteImage(@PathVariable Long id, Principal principal) {
+    menuService.deleteImage(id);
     return ResponseEntity.noContent().build();
   }
 }

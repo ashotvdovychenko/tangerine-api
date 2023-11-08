@@ -18,19 +18,19 @@ public interface UserService {
 
   List<User> findAll();
 
-  Optional<User> findById(Long id);
+  Optional<User> findById(Long userId);
 
   Optional<User> findByUsername(String username);
 
-  Optional<List<Recipe>> getRecipes(Long id);
+  Optional<List<Recipe>> getRecipes(Long userId);
 
-  Optional<List<Menu>> getMenus(Long id);
+  Optional<List<Menu>> getMenus(Long userId);
 
-  void deleteById(Long id);
+  void deleteById(Long userId);
 
-  String addPicture(Long id, MultipartFile file);
+  String addImage(Long userId, MultipartFile file);
 
-  Resource getPicture(Long id);
+  Resource getImage(Long userId);
 
-  void deletePicture(Long id);
+  void deleteImage(Long userId);
 }

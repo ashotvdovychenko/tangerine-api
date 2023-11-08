@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MenuRepository extends JpaRepository<Menu, Long> {
   @Modifying
-  @Query("UPDATE Menu r SET r.pictureUrl = :pictureUrl where r.id = :id")
-  void updatePictureUrlById(Long id, String pictureUrl);
+  @Query("UPDATE Menu r SET r.imageKey = :imageKey where r.id = :id")
+  void updateImageKeyById(Long id, String imageKey);
 }

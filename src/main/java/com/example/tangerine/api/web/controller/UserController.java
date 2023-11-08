@@ -94,7 +94,7 @@ public class UserController {
             .map(menuMapper::toPayload).toList()));
   }
 
-  @GetMapping("/{id}/picture")
+  @GetMapping("/{id}/image")
   @Operation(summary = "Get image of user", responses = {
       @ApiResponse(responseCode = "200",
           content = @Content(mediaType = MediaType.IMAGE_JPEG_VALUE)),
@@ -102,13 +102,13 @@ public class UserController {
           content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ExceptionResponse.class)))
   })
-  public ResponseEntity<Resource> getPicture(@PathVariable Long id) {
+  public ResponseEntity<Resource> getImage(@PathVariable Long id) {
     return ResponseEntity.ok()
         .contentType(MediaType.IMAGE_JPEG)
-        .body(userService.getPicture(id));
+        .body(userService.getImage(id));
   }
 
-  @PostMapping("/{id}/picture")
+  @PostMapping("/{id}/image")
   @PreAuthorize("@userChecker.check(#id, #principal.getName())")
   @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Add image to user", responses = {
@@ -123,11 +123,11 @@ public class UserController {
           content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ExceptionResponse.class)))
   })
-  public ResponseEntity<String> uploadPicture(@PathVariable Long id,
+  public ResponseEntity<String> uploadImage(@PathVariable Long id,
                                               @RequestPart MultipartFile file,
                                               Principal principal) {
-    var pictureKey = userService.addPicture(id, file);
-    return new ResponseEntity<>(pictureKey, HttpStatus.CREATED);
+    var imageKey = userService.addImage(id, file);
+    return new ResponseEntity<>(imageKey, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{id}")
@@ -163,7 +163,7 @@ public class UserController {
     return ResponseEntity.noContent().build();
   }
 
-  @DeleteMapping("/{id}/picture")
+  @DeleteMapping("/{id}/image")
   @PreAuthorize("@userChecker.check(#id, #principal.getName()) or hasRole('ROLE_ADMIN')")
   @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Delete image of user", responses = {
@@ -173,8 +173,8 @@ public class UserController {
           content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ExceptionResponse.class)))
   })
-  public ResponseEntity<Void> deletePicture(@PathVariable Long id, Principal principal) {
-    userService.deletePicture(id);
+  public ResponseEntity<Void> deleteImage(@PathVariable Long id, Principal principal) {
+    userService.deleteImage(id);
     return ResponseEntity.noContent().build();
   }
 }

@@ -25,9 +25,9 @@ public interface MenuService {
 
   void deleteRecipes(Long menuId, List<Long> recipeIndices);
 
-  String addPicture(Long menuId, MultipartFile file);
+  String addImage(Long menuId, MultipartFile file);
 
-  Resource getPicture(Long menuId);
+  Resource getImage(Long menuId);
 
-  void deletePicture(Long menuId);
+  void deleteImage(Long menuId);
 }
