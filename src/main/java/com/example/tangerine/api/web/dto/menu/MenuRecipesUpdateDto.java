@@ -7,5 +7,5 @@ import lombok.Data;
 @Data
 public class MenuRecipesUpdateDto {
   @NotNull
-  private List<Long> recipesIndices;
+  private List<Long> recipeIndices;
 }
