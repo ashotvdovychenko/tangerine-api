@@ -175,7 +175,7 @@ public class MenuController {
   })
   public ResponseEntity<Void> addRecipes(@RequestBody @Valid MenuRecipesUpdateDto menuDto,
                                          @PathVariable Long id, Principal principal) {
-    menuService.addRecipes(id, menuDto.getRecipesIndices());
+    menuService.addRecipes(id, menuDto.getRecipeIndices());
     return ResponseEntity.ok().build();
   }
 
@@ -203,7 +203,7 @@ public class MenuController {
   })
   public ResponseEntity<Void> deleteRecipes(@RequestBody @Valid MenuRecipesUpdateDto menuDto,
                                             @PathVariable Long id, Principal principal) {
-    menuService.deleteRecipes(id, menuDto.getRecipesIndices());
+    menuService.deleteRecipes(id, menuDto.getRecipeIndices());
     return ResponseEntity.noContent().build();
   }
 
