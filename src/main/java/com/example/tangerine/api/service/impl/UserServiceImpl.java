@@ -117,18 +117,18 @@ public class UserServiceImpl implements UserService {
     if (!userRepository.existsById(userId)) {
       throw new UserNotFoundException("User with id %s not found".formatted(userId));
     }
-    var pictureKey = UUID.randomUUID().toString();
+    var imageKey = UUID.randomUUID().toString();
     try {
       storageService.uploadImage(
           file.getBytes(),
-          "user-images/%s/%s".formatted(userId, pictureKey),
+          "user-images/%s/%s".formatted(userId, imageKey),
           bucket);
     } catch (IOException e) {
       var fileName = file.getOriginalFilename();
       throw new ImageUploadException("Failed to upload image %s".formatted(fileName));
     }
-    userRepository.updateImageKeyById(userId, pictureKey);
-    return pictureKey;
+    userRepository.updateImageKeyById(userId, imageKey);
+    return imageKey;
   }
 
   @Override

@@ -73,18 +73,18 @@ public class RecipeServiceImpl implements RecipeService {
     if (!recipeRepository.existsById(recipeId)) {
       throw new RecipeNotFoundException("Recipe with id %s not found".formatted(recipeId));
     }
-    var pictureKey = UUID.randomUUID().toString();
+    var imageKey = UUID.randomUUID().toString();
     try {
       storageService.uploadImage(
           file.getBytes(),
-          "recipe-images/%s/%s".formatted(recipeId, pictureKey),
+          "recipe-images/%s/%s".formatted(recipeId, imageKey),
           bucket);
     } catch (IOException e) {
       var fileName = file.getOriginalFilename();
       throw new ImageUploadException("Failed to upload image %s".formatted(fileName));
     }
-    recipeRepository.updateImageKeyById(recipeId, pictureKey);
-    return pictureKey;
+    recipeRepository.updateImageKeyById(recipeId, imageKey);
+    return imageKey;
   }
 
   @Override
