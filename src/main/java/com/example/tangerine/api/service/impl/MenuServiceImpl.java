@@ -99,18 +99,18 @@ public class MenuServiceImpl implements MenuService {
     if (!menuRepository.existsById(menuId)) {
       throw new MenuNotFoundException("Menu with id %s not found".formatted(menuId));
     }
-    var pictureKey = UUID.randomUUID().toString();
+    var imageKey = UUID.randomUUID().toString();
     try {
       storageService.uploadImage(
           file.getBytes(),
-          "menu-images/%s/%s".formatted(menuId, pictureKey),
+          "menu-images/%s/%s".formatted(menuId, imageKey),
           bucket);
     } catch (IOException e) {
       var fileName = file.getOriginalFilename();
       throw new ImageUploadException("Failed to upload image %s".formatted(fileName));
     }
-    menuRepository.updateImageKeyById(menuId, pictureKey);
-    return pictureKey;
+    menuRepository.updateImageKeyById(menuId, imageKey);
+    return imageKey;
   }
 
   @Override
