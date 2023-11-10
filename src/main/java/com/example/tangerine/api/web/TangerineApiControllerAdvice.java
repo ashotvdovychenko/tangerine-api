@@ -1,5 +1,6 @@
 package com.example.tangerine.api.web;
 
+import com.example.tangerine.api.exception.CommentNotFoundException;
 import com.example.tangerine.api.exception.ImageNotFoundException;
 import com.example.tangerine.api.exception.ImageUploadException;
 import com.example.tangerine.api.exception.InvalidPasswordException;
@@ -45,6 +46,7 @@ public class TangerineApiControllerAdvice {
       UserNotFoundException.class,
       RecipeNotFoundException.class,
       MenuNotFoundException.class,
+      CommentNotFoundException.class,
       RoleNotFoundException.class,
       ImageNotFoundException.class
   })

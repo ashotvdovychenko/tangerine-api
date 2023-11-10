@@ -1,5 +1,6 @@
 package com.example.tangerine.api.service;
 
+import com.example.tangerine.api.domain.Comment;
 import com.example.tangerine.api.domain.Menu;
 import com.example.tangerine.api.domain.Recipe;
 import java.util.List;
@@ -18,6 +19,8 @@ public interface RecipeService {
   Optional<Recipe> findById(Long recipeId);
 
   Optional<Set<Menu>> getMenus(Long recipeId);
+
+  Optional<List<Comment>> getComments(Long recipeId);
 
   void deleteById(Long recipeId);
 

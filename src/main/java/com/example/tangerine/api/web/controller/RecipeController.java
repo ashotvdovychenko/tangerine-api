@@ -1,11 +1,15 @@
 package com.example.tangerine.api.web.controller;
 
+import com.example.tangerine.api.service.CommentService;
 import com.example.tangerine.api.service.RecipeService;
 import com.example.tangerine.api.web.dto.ExceptionResponse;
+import com.example.tangerine.api.web.dto.comment.CommentCreationDto;
+import com.example.tangerine.api.web.dto.comment.CommentDto;
 import com.example.tangerine.api.web.dto.menu.MenuDto;
 import com.example.tangerine.api.web.dto.recipe.RecipeCreationDto;
 import com.example.tangerine.api.web.dto.recipe.RecipeDto;
 import com.example.tangerine.api.web.dto.recipe.RecipeUpdateDto;
+import com.example.tangerine.api.web.mapper.CommentMapper;
 import com.example.tangerine.api.web.mapper.MenuMapper;
 import com.example.tangerine.api.web.mapper.RecipeMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,8 +49,10 @@ import org.springframework.web.multipart.MultipartFile;
 public class RecipeController {
 
   private final RecipeService recipeService;
+  private final CommentService commentService;
   private final RecipeMapper recipeMapper;
   private final MenuMapper menuMapper;
+  private final CommentMapper commentMapper;
 
   @GetMapping
   @Operation(summary = "Get all recipes", responses = @ApiResponse(responseCode = "200",
@@ -82,6 +88,19 @@ public class RecipeController {
             .map(menuMapper::toPayload).toList()));
   }
 
+  @GetMapping("/{id}/comments")
+  @Operation(summary = "Get comments of recipe", responses = {
+      @ApiResponse(responseCode = "200",
+          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              array = @ArraySchema(schema = @Schema(implementation = CommentDto.class)))),
+      @ApiResponse(responseCode = "404", content = @Content)
+  })
+  public ResponseEntity<List<CommentDto>> getComments(@PathVariable Long id) {
+    return ResponseEntity.of(recipeService.getComments(id)
+        .map(menus -> menus.stream()
+            .map(commentMapper::toPayload).toList()));
+  }
+
   @GetMapping("/{id}/image")
   @Operation(summary = "Get image of recipe", responses = {
       @ApiResponse(responseCode = "200",
@@ -106,7 +125,7 @@ public class RecipeController {
               schema = @Schema(implementation = ExceptionResponse.class))),
       @ApiResponse(responseCode = "404",
           content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ExceptionResponse.class)))
+              schema = @Schema(implementation = ExceptionResponse.class))),
   })
   public ResponseEntity<RecipeDto> create(@RequestBody @Valid RecipeCreationDto recipeDto,
                                           Principal principal) {
@@ -114,8 +133,28 @@ public class RecipeController {
     return new ResponseEntity<>(recipeMapper.toPayload(created), HttpStatus.CREATED);
   }
 
+  @PostMapping("/{id}/comments")
+  @Operation(summary = "Add comment to recipe", responses = {
+      @ApiResponse(responseCode = "201",
+          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = CommentDto.class))),
+      @ApiResponse(responseCode = "400",
+          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ExceptionResponse.class))),
+      @ApiResponse(responseCode = "404",
+          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ExceptionResponse.class))),
+  })
+  public ResponseEntity<CommentDto> addComment(@PathVariable Long id,
+                                               @RequestBody @Valid CommentCreationDto commentDto,
+                                               Principal principal) {
+    var comment = commentService.create(
+        commentMapper.toEntity(commentDto), id, principal.getName());
+    return new ResponseEntity<>(commentMapper.toPayload(comment), HttpStatus.CREATED);
+  }
+
   @PostMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @PreAuthorize("@recipeChecker.check(#id, #principal.getName())")
+  @PreAuthorize("@recipeChecker.isAuthor(#id, #principal.getName())")
   @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Add image to recipe", responses = {
       @ApiResponse(responseCode = "201",
@@ -130,14 +169,14 @@ public class RecipeController {
               schema = @Schema(implementation = ExceptionResponse.class)))
   })
   public ResponseEntity<String> uploadImage(@PathVariable Long id,
-                                              @RequestPart MultipartFile file,
-                                              Principal principal) {
+                                            @RequestPart MultipartFile file,
+                                            Principal principal) {
     var imageKey = recipeService.addImage(id, file);
     return new ResponseEntity<>(imageKey, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{id}")
-  @PreAuthorize("@recipeChecker.check(#id, #principal.getName())")
+  @PreAuthorize("@recipeChecker.isAuthor(#id, #principal.getName())")
   @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Update recipe by id", responses = {
       @ApiResponse(responseCode = "200",
@@ -159,7 +198,7 @@ public class RecipeController {
   }
 
   @DeleteMapping("/{id}")
-  @PreAuthorize("@recipeChecker.check(#id, #principal.getName()) or hasRole('ROLE_ADMIN')")
+  @PreAuthorize("@recipeChecker.isAuthor(#id, #principal.getName()) or hasRole('ROLE_ADMIN')")
   @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Delete recipe by id", responses = {
       @ApiResponse(responseCode = "204", content = @Content),
@@ -171,7 +210,7 @@ public class RecipeController {
   }
 
   @DeleteMapping("/{id}/image")
-  @PreAuthorize("@recipeChecker.check(#id, #principal.getName()) or hasRole('ROLE_ADMIN')")
+  @PreAuthorize("@recipeChecker.isAuthor(#id, #principal.getName()) or hasRole('ROLE_ADMIN')")
   @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Delete image of recipe", responses = {
       @ApiResponse(responseCode = "204", content = @Content),

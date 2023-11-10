@@ -14,4 +14,5 @@ public class RecipeDto {
   private Complexity complexity;
   private String imageKey;
   private Long authorId;
+  private String authorUsername;
 }

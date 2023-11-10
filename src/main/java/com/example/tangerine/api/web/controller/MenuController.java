@@ -118,7 +118,7 @@ public class MenuController {
   }
 
   @PostMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @PreAuthorize("@menuChecker.check(#id, #principal.getName())")
+  @PreAuthorize("@menuChecker.isAuthor(#id, #principal.getName())")
   @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Add image of menu by id", responses = {
       @ApiResponse(responseCode = "201",
@@ -140,7 +140,7 @@ public class MenuController {
   }
 
   @PatchMapping("/{id}")
-  @PreAuthorize("@menuChecker.check(#id, #principal.getName())")
+  @PreAuthorize("@menuChecker.isAuthor(#id, #principal.getName())")
   @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Update menu by id", responses = {
       @ApiResponse(responseCode = "200",
@@ -161,7 +161,7 @@ public class MenuController {
   }
 
   @PutMapping("/{id}/recipes")
-  @PreAuthorize("@menuChecker.check(#id, #principal.getName())")
+  @PreAuthorize("@menuChecker.isAuthor(#id, #principal.getName())")
   @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Add recipes to menu", responses = {
       @ApiResponse(responseCode = "200", content = @Content),
@@ -180,7 +180,7 @@ public class MenuController {
   }
 
   @DeleteMapping("/{id}")
-  @PreAuthorize("@menuChecker.check(#id, #principal.getName()) or hasRole('ROLE_ADMIN')")
+  @PreAuthorize("@menuChecker.isAuthor(#id, #principal.getName()) or hasRole('ROLE_ADMIN')")
   @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Delete menu by id", responses = {
       @ApiResponse(responseCode = "204", content = @Content),
@@ -192,7 +192,7 @@ public class MenuController {
   }
 
   @DeleteMapping("/{id}/recipes")
-  @PreAuthorize("@menuChecker.check(#id, #principal.getName())")
+  @PreAuthorize("@menuChecker.isAuthor(#id, #principal.getName())")
   @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Delete recipes from menu", responses = {
       @ApiResponse(responseCode = "204", content = @Content),
@@ -209,7 +209,7 @@ public class MenuController {
 
 
   @DeleteMapping("/{id}/image")
-  @PreAuthorize("@menuChecker.check(#id, #principal.getName()) or hasRole('ROLE_ADMIN')")
+  @PreAuthorize("@menuChecker.isAuthor(#id, #principal.getName()) or hasRole('ROLE_ADMIN')")
   @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Delete image of menu by id", responses = {
       @ApiResponse(responseCode = "204", content = @Content),

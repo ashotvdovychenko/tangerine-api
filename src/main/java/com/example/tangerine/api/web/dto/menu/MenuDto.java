@@ -9,4 +9,5 @@ public class MenuDto {
   private Long createdAt;
   private String imageKey;
   private Long authorId;
+  private String authorUsername;
 }

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class MenuChecker {
   private final MenuRepository menuRepository;
 
-  public boolean check(Long id, String username) {
+  public boolean isAuthor(Long id, String username) {
     if (id == null || username == null) {
       return false;
     }

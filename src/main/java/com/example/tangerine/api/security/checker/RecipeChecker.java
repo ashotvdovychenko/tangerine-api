@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class RecipeChecker {
   private final RecipeRepository recipeRepository;
 
-  public boolean check(Long id, String username) {
+  public boolean isAuthor(Long id, String username) {
     if (id == null || username == null) {
       return false;
     }
