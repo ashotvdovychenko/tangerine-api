@@ -55,11 +55,15 @@ public class User {
   @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Menu> menus = new ArrayList<>();
 
+  @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Comment> comments = new ArrayList<>();
+
   @ManyToMany
   @JoinTable(name = "users_roles",
       joinColumns = @JoinColumn(name = "user_id"),
       inverseJoinColumns = @JoinColumn(name = "role_id"))
   private Set<Role> roles = new HashSet<>();
+
 
   public void addRecipe(Recipe recipe) {
     this.recipes.add(recipe);
@@ -79,6 +83,16 @@ public class User {
   public void removeMenu(Menu menu) {
     this.menus.remove(menu);
     menu.setAuthor(null);
+  }
+
+  public void addComment(Comment comment) {
+    this.comments.add(comment);
+    comment.setAuthor(this);
+  }
+
+  public void removeComment(Comment comment) {
+    this.comments.remove(comment);
+    comment.setAuthor(null);
   }
 
   public void addRole(Role role) {

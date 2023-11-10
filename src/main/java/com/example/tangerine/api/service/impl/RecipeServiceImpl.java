@@ -1,5 +1,6 @@
 package com.example.tangerine.api.service.impl;
 
+import com.example.tangerine.api.domain.Comment;
 import com.example.tangerine.api.domain.Menu;
 import com.example.tangerine.api.domain.Recipe;
 import com.example.tangerine.api.exception.ImageNotFoundException;
@@ -60,6 +61,12 @@ public class RecipeServiceImpl implements RecipeService {
   @Transactional
   public Optional<Set<Menu>> getMenus(Long recipeId) {
     return recipeRepository.findById(recipeId).map(Recipe::getMenus).map(Set::copyOf);
+  }
+
+  @Override
+  @Transactional
+  public Optional<List<Comment>> getComments(Long recipeId) {
+    return recipeRepository.findById(recipeId).map(Recipe::getComments).map(List::copyOf);
   }
 
   @Override

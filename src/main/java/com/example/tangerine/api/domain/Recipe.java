@@ -1,5 +1,6 @@
 package com.example.tangerine.api.domain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,9 +11,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import lombok.Getter;
@@ -57,6 +61,19 @@ public class Recipe {
 
   @ManyToMany(mappedBy = "recipes")
   private Set<Menu> menus = new LinkedHashSet<>();
+
+  @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Comment> comments = new ArrayList<>();
+
+  public void addComment(Comment comment) {
+    this.comments.add(comment);
+    comment.setRecipe(this);
+  }
+
+  public void removeComment(Comment comment) {
+    this.comments.remove(comment);
+    comment.setRecipe(null);
+  }
 
   @Override
   public boolean equals(Object o) {

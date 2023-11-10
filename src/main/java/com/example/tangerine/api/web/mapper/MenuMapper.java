@@ -13,6 +13,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 @Mapper
 public interface MenuMapper {
   @Mapping(target = "authorId", source = "author.id")
+  @Mapping(target = "authorUsername", source = "author.username")
   @Mapping(target = "createdAt", expression = "java(menu.getCreatedAt().getEpochSecond())")
   MenuDto toPayload(Menu menu);
 
