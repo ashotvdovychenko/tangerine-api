@@ -99,6 +99,7 @@ public class MenuController {
   }
 
   @PostMapping
+  @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Create new menu", responses = {
       @ApiResponse(responseCode = "201",
           content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,

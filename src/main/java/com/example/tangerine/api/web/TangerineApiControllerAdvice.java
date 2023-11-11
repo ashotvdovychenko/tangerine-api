@@ -3,6 +3,7 @@ package com.example.tangerine.api.web;
 import com.example.tangerine.api.exception.CommentNotFoundException;
 import com.example.tangerine.api.exception.ImageNotFoundException;
 import com.example.tangerine.api.exception.ImageUploadException;
+import com.example.tangerine.api.exception.IngredientNotFoundException;
 import com.example.tangerine.api.exception.InvalidPasswordException;
 import com.example.tangerine.api.exception.MenuNotFoundException;
 import com.example.tangerine.api.exception.RecipeNotFoundException;
@@ -47,6 +48,7 @@ public class TangerineApiControllerAdvice {
       RecipeNotFoundException.class,
       MenuNotFoundException.class,
       CommentNotFoundException.class,
+      IngredientNotFoundException.class,
       RoleNotFoundException.class,
       ImageNotFoundException.class
   })

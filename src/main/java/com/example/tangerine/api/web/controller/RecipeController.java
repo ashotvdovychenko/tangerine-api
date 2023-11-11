@@ -5,11 +5,14 @@ import com.example.tangerine.api.service.RecipeService;
 import com.example.tangerine.api.web.dto.ExceptionResponse;
 import com.example.tangerine.api.web.dto.comment.CommentCreationDto;
 import com.example.tangerine.api.web.dto.comment.CommentDto;
+import com.example.tangerine.api.web.dto.ingredient.IngredientDto;
 import com.example.tangerine.api.web.dto.menu.MenuDto;
 import com.example.tangerine.api.web.dto.recipe.RecipeCreationDto;
 import com.example.tangerine.api.web.dto.recipe.RecipeDto;
+import com.example.tangerine.api.web.dto.recipe.RecipeIngredientsUpdateDto;
 import com.example.tangerine.api.web.dto.recipe.RecipeUpdateDto;
 import com.example.tangerine.api.web.mapper.CommentMapper;
+import com.example.tangerine.api.web.mapper.IngredientMapper;
 import com.example.tangerine.api.web.mapper.MenuMapper;
 import com.example.tangerine.api.web.mapper.RecipeMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,6 +38,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -53,6 +57,7 @@ public class RecipeController {
   private final RecipeMapper recipeMapper;
   private final MenuMapper menuMapper;
   private final CommentMapper commentMapper;
+  private final IngredientMapper ingredientMapper;
 
   @GetMapping
   @Operation(summary = "Get all recipes", responses = @ApiResponse(responseCode = "200",
@@ -101,6 +106,19 @@ public class RecipeController {
             .map(commentMapper::toPayload).toList()));
   }
 
+  @GetMapping("/{id}/ingredients")
+  @Operation(summary = "Get ingredients of recipe", responses = {
+      @ApiResponse(responseCode = "200",
+          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              array = @ArraySchema(schema = @Schema(implementation = IngredientDto.class)))),
+      @ApiResponse(responseCode = "404", content = @Content)
+  })
+  public ResponseEntity<List<IngredientDto>> getIngredients(@PathVariable Long id) {
+    return ResponseEntity.of(recipeService.getIngredients(id)
+        .map(ingredients -> ingredients.stream()
+            .map(ingredientMapper::toPayload).toList()));
+  }
+
   @GetMapping("/{id}/image")
   @Operation(summary = "Get image of recipe", responses = {
       @ApiResponse(responseCode = "200",
@@ -116,6 +134,7 @@ public class RecipeController {
   }
 
   @PostMapping
+  @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Create new recipe", responses = {
       @ApiResponse(responseCode = "201",
           content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -125,15 +144,17 @@ public class RecipeController {
               schema = @Schema(implementation = ExceptionResponse.class))),
       @ApiResponse(responseCode = "404",
           content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ExceptionResponse.class))),
+              schema = @Schema(implementation = ExceptionResponse.class)))
   })
   public ResponseEntity<RecipeDto> create(@RequestBody @Valid RecipeCreationDto recipeDto,
                                           Principal principal) {
-    var created = recipeService.create(recipeMapper.toEntity(recipeDto), principal.getName());
+    var created = recipeService.create(recipeMapper.toEntity(recipeDto),
+        recipeDto.getIngredientIndices(), principal.getName());
     return new ResponseEntity<>(recipeMapper.toPayload(created), HttpStatus.CREATED);
   }
 
   @PostMapping("/{id}/comments")
+  @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Add comment to recipe", responses = {
       @ApiResponse(responseCode = "201",
           content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -143,7 +164,7 @@ public class RecipeController {
               schema = @Schema(implementation = ExceptionResponse.class))),
       @ApiResponse(responseCode = "404",
           content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ExceptionResponse.class))),
+              schema = @Schema(implementation = ExceptionResponse.class)))
   })
   public ResponseEntity<CommentDto> addComment(@PathVariable Long id,
                                                @RequestBody @Valid CommentCreationDto commentDto,
@@ -197,15 +218,52 @@ public class RecipeController {
         .map(recipeMapper::toPayload));
   }
 
+  @PutMapping("/{id}/ingredients")
+  @PreAuthorize("@recipeChecker.isAuthor(#id, #principal.getName())")
+  @SecurityRequirement(name = "bearer_token")
+  @Operation(summary = "Add ingredients to recipe", responses = {
+      @ApiResponse(responseCode = "200", content = @Content),
+      @ApiResponse(responseCode = "400",
+          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ExceptionResponse.class))),
+      @ApiResponse(responseCode = "403", content = @Content),
+      @ApiResponse(responseCode = "404",
+          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ExceptionResponse.class)))
+  })
+  public ResponseEntity<Void> addIngredients(@RequestBody @Valid
+                                             RecipeIngredientsUpdateDto recipeDto,
+                                             @PathVariable Long id, Principal principal) {
+    recipeService.addIngredients(id, recipeDto.getIngredientIndices());
+    return ResponseEntity.ok().build();
+  }
+
   @DeleteMapping("/{id}")
   @PreAuthorize("@recipeChecker.isAuthor(#id, #principal.getName()) or hasRole('ROLE_ADMIN')")
   @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Delete recipe by id", responses = {
       @ApiResponse(responseCode = "204", content = @Content),
-      @ApiResponse(responseCode = "403", content = @Content),
+      @ApiResponse(responseCode = "403", content = @Content)
   })
   public ResponseEntity<Void> deleteById(@PathVariable Long id, Principal principal) {
     recipeService.deleteById(id);
+    return ResponseEntity.noContent().build();
+  }
+
+  @DeleteMapping("/{id}/ingredients")
+  @PreAuthorize("@recipeChecker.isAuthor(#id, #principal.getName())")
+  @SecurityRequirement(name = "bearer_token")
+  @Operation(summary = "Delete ingredients from recipe", responses = {
+      @ApiResponse(responseCode = "204", content = @Content),
+      @ApiResponse(responseCode = "400",
+          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ExceptionResponse.class))),
+      @ApiResponse(responseCode = "403", content = @Content)
+  })
+  public ResponseEntity<Void> deleteIngredients(@RequestBody @Valid
+                                                RecipeIngredientsUpdateDto recipeDto,
+                                                @PathVariable Long id, Principal principal) {
+    recipeService.deleteIngredients(id, recipeDto.getIngredientIndices());
     return ResponseEntity.noContent().build();
   }
 
