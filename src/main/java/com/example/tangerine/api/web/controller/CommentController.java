@@ -88,7 +88,7 @@ public class CommentController {
   @SecurityRequirement(name = "bearer_token")
   @Operation(summary = "Delete comment by id", responses = {
       @ApiResponse(responseCode = "204", content = @Content),
-      @ApiResponse(responseCode = "403", content = @Content),
+      @ApiResponse(responseCode = "403", content = @Content)
   })
   public ResponseEntity<Void> deleteById(@PathVariable Long id,
                                          Principal principal) {

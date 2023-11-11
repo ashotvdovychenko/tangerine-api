@@ -1,6 +1,7 @@
 package com.example.tangerine.api.service;
 
 import com.example.tangerine.api.domain.Comment;
+import com.example.tangerine.api.domain.Ingredient;
 import com.example.tangerine.api.domain.Menu;
 import com.example.tangerine.api.domain.Recipe;
 import java.util.List;
@@ -10,7 +11,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface RecipeService {
-  Recipe create(Recipe recipe, String username);
+  Recipe create(Recipe recipe, List<Long> ingredientIndices, String username);
 
   Recipe update(Recipe recipe);
 
@@ -23,6 +24,12 @@ public interface RecipeService {
   Optional<List<Comment>> getComments(Long recipeId);
 
   void deleteById(Long recipeId);
+
+  void addIngredients(Long recipeId, List<Long> ingredientIndices);
+
+  Optional<Set<Ingredient>> getIngredients(Long recipeId);
+
+  void deleteIngredients(Long recipeId, List<Long> ingredientIndices);
 
   String addImage(Long recipeId, MultipartFile file);
 

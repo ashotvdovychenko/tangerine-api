@@ -2,7 +2,9 @@ package com.example.tangerine.api.web.dto.recipe;
 
 import com.example.tangerine.api.domain.Complexity;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
+import java.util.List;
 import lombok.Data;
 
 @Data
@@ -20,4 +22,7 @@ public class RecipeCreationDto {
   private Long productsCost;
 
   private Complexity complexity;
+
+  @NotNull
+  private List<Long> ingredientIndices;
 }

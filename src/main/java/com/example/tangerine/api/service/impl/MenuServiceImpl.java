@@ -29,11 +29,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class MenuServiceImpl implements MenuService {
 
   private final MenuRepository menuRepository;
+  private final UserRepository userRepository;
   private final RecipeRepository recipeRepository;
   private final StorageService storageService;
   @Value("${aws.bucket}")
   private String bucket;
-  private final UserRepository userRepository;
 
   @Override
   @Transactional
