@@ -23,6 +23,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 public class TangerineApiControllerAdvice {
@@ -30,7 +31,8 @@ public class TangerineApiControllerAdvice {
   @ExceptionHandler({
       ImageUploadException.class,
       HttpMessageNotReadableException.class,
-      UserAlreadyExistsException.class
+      UserAlreadyExistsException.class,
+      MaxUploadSizeExceededException.class
   })
   public ResponseEntity<ExceptionResponse> handleBadRequest(RuntimeException exception) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
