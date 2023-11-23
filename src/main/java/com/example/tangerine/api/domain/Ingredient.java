@@ -18,7 +18,7 @@ import org.hibernate.Hibernate;
 @Getter
 @Setter
 @Entity
-@Table(name = "ingredient")
+@Table(name = "INGREDIENTS")
 public class Ingredient {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,8 +45,8 @@ public class Ingredient {
     if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
       return false;
     }
-    Recipe recipe = (Recipe) o;
-    return getId() != null && Objects.equals(getId(), recipe.getId());
+    Ingredient ingredient = (Ingredient) o;
+    return getId() != null && Objects.equals(getId(), ingredient.getId());
   }
 
   @Override
