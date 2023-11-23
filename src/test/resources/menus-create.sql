@@ -1,5 +1,5 @@
 INSERT INTO menus (id, created_at, name, image_key, author_id)
-VALUES (1, now(), 'First menu', null, 1),
-       (2, now(), 'Second menu', null, 2),
-       (3, now(), 'Third menu', null, 3),
-       (4, now(), 'Fourth menu', null, 4);
+VALUES (1, now(), 'First menu', 1, 1),
+       (2, now(), 'Second menu', 2, 2),
+       (3, now(), 'Third menu', 3, 3),
+       (4, now(), 'Fourth menu', 4, 4);
