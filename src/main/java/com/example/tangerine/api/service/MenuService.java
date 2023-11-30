@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface MenuService {
   Menu create(Menu menu, List<Long> recipeIndices, String username);
 
-  Menu update(Menu menu);
+  Menu update(Menu menu, List<Long> recipeIndices);
 
   List<Menu> findAll();
 
@@ -19,11 +19,7 @@ public interface MenuService {
 
   void deleteById(Long menuId);
 
-  void addRecipes(Long menuId, List<Long> recipeIndices);
-
   Optional<Set<Recipe>> getRecipes(Long menuId);
-
-  void deleteRecipes(Long menuId, List<Long> recipeIndices);
 
   String addImage(Long menuId, MultipartFile file);
 

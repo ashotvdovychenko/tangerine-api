@@ -48,7 +48,11 @@ public class MenuServiceImpl implements MenuService {
   }
 
   @Override
-  public Menu update(Menu menu) {
+  @Transactional
+  public Menu update(Menu menu, List<Long> recipeIndices) {
+    menu.rewriteRecipes(StreamEx.of(recipeIndices)
+        .mapPartial(recipeRepository::findById)
+        .toList());
     return menuRepository.save(menu);
   }
 
@@ -69,28 +73,8 @@ public class MenuServiceImpl implements MenuService {
 
   @Override
   @Transactional
-  public void addRecipes(Long menuId, List<Long> recipeIndices) {
-    var menu = menuRepository.findById(menuId).orElseThrow(
-        () -> new MenuNotFoundException("Menu with id %s not found".formatted(menuId))
-    );
-    StreamEx.of(recipeIndices)
-        .mapPartial(recipeRepository::findById)
-        .forEach(menu::addRecipe);
-  }
-
-  @Override
-  @Transactional
   public Optional<Set<Recipe>> getRecipes(Long menuId) {
     return menuRepository.findById(menuId).map(Menu::getRecipes).map(Set::copyOf);
-  }
-
-  @Override
-  @Transactional
-  public void deleteRecipes(Long menuId, List<Long> recipeIndices) {
-    menuRepository.findById(menuId)
-        .ifPresent(menu -> menu.removeRecipes(menu.getRecipes().stream()
-            .filter(recipe -> recipeIndices.contains(recipe.getId()))
-            .toList()));
   }
 
   @Override

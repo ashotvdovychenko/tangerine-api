@@ -9,7 +9,6 @@ import com.example.tangerine.api.web.dto.ingredient.IngredientDto;
 import com.example.tangerine.api.web.dto.menu.MenuDto;
 import com.example.tangerine.api.web.dto.recipe.RecipeCreationDto;
 import com.example.tangerine.api.web.dto.recipe.RecipeDto;
-import com.example.tangerine.api.web.dto.recipe.RecipeIngredientsUpdateDto;
 import com.example.tangerine.api.web.dto.recipe.RecipeUpdateDto;
 import com.example.tangerine.api.web.mapper.CommentMapper;
 import com.example.tangerine.api.web.mapper.IngredientMapper;
@@ -38,7 +37,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -210,32 +208,11 @@ public class RecipeController {
       @ApiResponse(responseCode = "404", content = @Content)
   })
   public ResponseEntity<RecipeDto> update(@RequestBody @Valid RecipeUpdateDto recipeDto,
-                                          @PathVariable Long id,
-                                          Principal principal) {
+                                          @PathVariable Long id, Principal principal) {
     return ResponseEntity.of(recipeService.findById(id)
-        .map(menu -> recipeMapper.partialUpdate(recipeDto, menu))
-        .map(recipeService::update)
+        .map(recipe -> recipeMapper.partialUpdate(recipeDto, recipe))
+        .map(recipe -> recipeService.update(recipe, recipeDto.getIngredientIndices()))
         .map(recipeMapper::toPayload));
-  }
-
-  @PutMapping("/{id}/ingredients")
-  @PreAuthorize("@recipeChecker.isAuthor(#id, #principal.getName())")
-  @SecurityRequirement(name = "bearer_token")
-  @Operation(summary = "Add ingredients to recipe", responses = {
-      @ApiResponse(responseCode = "200", content = @Content),
-      @ApiResponse(responseCode = "400",
-          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ExceptionResponse.class))),
-      @ApiResponse(responseCode = "403", content = @Content),
-      @ApiResponse(responseCode = "404",
-          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ExceptionResponse.class)))
-  })
-  public ResponseEntity<Void> addIngredients(@RequestBody @Valid
-                                             RecipeIngredientsUpdateDto recipeDto,
-                                             @PathVariable Long id, Principal principal) {
-    recipeService.addIngredients(id, recipeDto.getIngredientIndices());
-    return ResponseEntity.ok().build();
   }
 
   @DeleteMapping("/{id}")
@@ -247,23 +224,6 @@ public class RecipeController {
   })
   public ResponseEntity<Void> deleteById(@PathVariable Long id, Principal principal) {
     recipeService.deleteById(id);
-    return ResponseEntity.noContent().build();
-  }
-
-  @DeleteMapping("/{id}/ingredients")
-  @PreAuthorize("@recipeChecker.isAuthor(#id, #principal.getName())")
-  @SecurityRequirement(name = "bearer_token")
-  @Operation(summary = "Delete ingredients from recipe", responses = {
-      @ApiResponse(responseCode = "204", content = @Content),
-      @ApiResponse(responseCode = "400",
-          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ExceptionResponse.class))),
-      @ApiResponse(responseCode = "403", content = @Content)
-  })
-  public ResponseEntity<Void> deleteIngredients(@RequestBody @Valid
-                                                RecipeIngredientsUpdateDto recipeDto,
-                                                @PathVariable Long id, Principal principal) {
-    recipeService.deleteIngredients(id, recipeDto.getIngredientIndices());
     return ResponseEntity.noContent().build();
   }
 

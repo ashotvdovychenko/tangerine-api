@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface RecipeService {
   Recipe create(Recipe recipe, List<Long> ingredientIndices, String username);
 
-  Recipe update(Recipe recipe);
+  Recipe update(Recipe recipe, List<Long> ingredientIndices);
 
   List<Recipe> findAll();
 
@@ -25,11 +25,7 @@ public interface RecipeService {
 
   void deleteById(Long recipeId);
 
-  void addIngredients(Long recipeId, List<Long> ingredientIndices);
-
   Optional<Set<Ingredient>> getIngredients(Long recipeId);
-
-  void deleteIngredients(Long recipeId, List<Long> ingredientIndices);
 
   String addImage(Long recipeId, MultipartFile file);
 

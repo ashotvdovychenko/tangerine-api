@@ -6,7 +6,6 @@ import com.example.tangerine.api.domain.Menu;
 import com.example.tangerine.api.domain.Recipe;
 import com.example.tangerine.api.exception.ImageNotFoundException;
 import com.example.tangerine.api.exception.ImageUploadException;
-import com.example.tangerine.api.exception.MenuNotFoundException;
 import com.example.tangerine.api.exception.RecipeNotFoundException;
 import com.example.tangerine.api.exception.UserNotFoundException;
 import com.example.tangerine.api.repository.IngredientRepository;
@@ -51,7 +50,10 @@ public class RecipeServiceImpl implements RecipeService {
   }
 
   @Override
-  public Recipe update(Recipe recipe) {
+  public Recipe update(Recipe recipe, List<Long> ingredientIndices) {
+    recipe.rewriteIngredients(StreamEx.of(ingredientIndices)
+        .mapPartial(ingredientRepository::findById)
+        .toList());
     return recipeRepository.save(recipe);
   }
 
@@ -88,28 +90,8 @@ public class RecipeServiceImpl implements RecipeService {
 
   @Override
   @Transactional
-  public void addIngredients(Long recipeId, List<Long> ingredientIndices) {
-    var recipe = recipeRepository.findById(recipeId).orElseThrow(
-        () -> new MenuNotFoundException("Recipe with id %s not found".formatted(recipeId))
-    );
-    StreamEx.of(ingredientIndices)
-        .mapPartial(ingredientRepository::findById)
-        .forEach(recipe::addIngredient);
-  }
-
-  @Override
-  @Transactional
   public Optional<Set<Ingredient>> getIngredients(Long recipeId) {
     return recipeRepository.findById(recipeId).map(Recipe::getIngredients).map(Set::copyOf);
-  }
-
-  @Override
-  @Transactional
-  public void deleteIngredients(Long recipeId, List<Long> ingredientIndices) {
-    recipeRepository.findById(recipeId)
-        .ifPresent(recipe -> recipe.removeIngredients(recipe.getIngredients().stream()
-            .filter(ingredient -> ingredientIndices.contains(ingredient.getId()))
-            .toList()));
   }
 
   @Override
