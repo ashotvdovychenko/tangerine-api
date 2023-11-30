@@ -4,7 +4,6 @@ import com.example.tangerine.api.service.MenuService;
 import com.example.tangerine.api.web.dto.ExceptionResponse;
 import com.example.tangerine.api.web.dto.menu.MenuCreationDto;
 import com.example.tangerine.api.web.dto.menu.MenuDto;
-import com.example.tangerine.api.web.dto.menu.MenuRecipesUpdateDto;
 import com.example.tangerine.api.web.dto.menu.MenuUpdateDto;
 import com.example.tangerine.api.web.dto.recipe.RecipeDto;
 import com.example.tangerine.api.web.mapper.MenuMapper;
@@ -32,7 +31,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -157,27 +155,8 @@ public class MenuController {
                                         @PathVariable Long id, Principal principal) {
     return ResponseEntity.of(menuService.findById(id)
         .map(menu -> menuMapper.partialUpdate(menuDto, menu))
-        .map(menuService::update)
+        .map(menu -> menuService.update(menu, menuDto.getRecipeIndices()))
         .map(menuMapper::toPayload));
-  }
-
-  @PutMapping("/{id}/recipes")
-  @PreAuthorize("@menuChecker.isAuthor(#id, #principal.getName())")
-  @SecurityRequirement(name = "bearer_token")
-  @Operation(summary = "Add recipes to menu", responses = {
-      @ApiResponse(responseCode = "200", content = @Content),
-      @ApiResponse(responseCode = "400",
-          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ExceptionResponse.class))),
-      @ApiResponse(responseCode = "403", content = @Content),
-      @ApiResponse(responseCode = "404",
-          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ExceptionResponse.class)))
-  })
-  public ResponseEntity<Void> addRecipes(@RequestBody @Valid MenuRecipesUpdateDto menuDto,
-                                         @PathVariable Long id, Principal principal) {
-    menuService.addRecipes(id, menuDto.getRecipeIndices());
-    return ResponseEntity.ok().build();
   }
 
   @DeleteMapping("/{id}")
@@ -191,23 +170,6 @@ public class MenuController {
     menuService.deleteById(id);
     return ResponseEntity.noContent().build();
   }
-
-  @DeleteMapping("/{id}/recipes")
-  @PreAuthorize("@menuChecker.isAuthor(#id, #principal.getName())")
-  @SecurityRequirement(name = "bearer_token")
-  @Operation(summary = "Delete recipes from menu", responses = {
-      @ApiResponse(responseCode = "204", content = @Content),
-      @ApiResponse(responseCode = "400",
-          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ExceptionResponse.class))),
-      @ApiResponse(responseCode = "403", content = @Content)
-  })
-  public ResponseEntity<Void> deleteRecipes(@RequestBody @Valid MenuRecipesUpdateDto menuDto,
-                                            @PathVariable Long id, Principal principal) {
-    menuService.deleteRecipes(id, menuDto.getRecipeIndices());
-    return ResponseEntity.noContent().build();
-  }
-
 
   @DeleteMapping("/{id}/image")
   @PreAuthorize("@menuChecker.isAuthor(#id, #principal.getName()) or hasRole('ROLE_ADMIN')")

@@ -2,6 +2,7 @@ package com.example.tangerine.api.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -42,7 +43,7 @@ public class Menu {
   @JoinColumn(name = "author_id")
   private User author;
 
-  @ManyToMany
+  @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(name = "menus_recipes",
       joinColumns = @JoinColumn(name = "menu_id"),
       inverseJoinColumns = @JoinColumn(name = "recipe_id"))
@@ -58,8 +59,10 @@ public class Menu {
     recipe.getMenus().remove(this);
   }
 
-  public void removeRecipes(List<Recipe> recipes) {
-    recipes.forEach(this::removeRecipe);
+  public void rewriteRecipes(List<Recipe> recipes) {
+    this.recipes.forEach(recipe -> recipe.getMenus().remove(this));
+    this.recipes.clear();
+    recipes.forEach(this::addRecipe);
   }
 
   @Override

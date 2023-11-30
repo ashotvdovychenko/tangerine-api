@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -63,10 +64,10 @@ public class Recipe {
   @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Comment> comments = new ArrayList<>();
 
-  @ManyToMany(mappedBy = "recipes")
+  @ManyToMany(mappedBy = "recipes", fetch = FetchType.EAGER)
   private Set<Menu> menus = new HashSet<>();
 
-  @ManyToMany
+  @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(name = "recipes_ingredients",
       joinColumns = @JoinColumn(name = "recipe_id"),
       inverseJoinColumns = @JoinColumn(name = "ingredient_id"))
@@ -92,8 +93,10 @@ public class Recipe {
     ingredient.getRecipes().remove(this);
   }
 
-  public void removeIngredients(List<Ingredient> ingredients) {
-    ingredients.forEach(this::removeIngredient);
+  public void rewriteIngredients(List<Ingredient> ingredients) {
+    this.ingredients.forEach(ingredient -> ingredient.getRecipes().remove(this));
+    this.ingredients.clear();
+    ingredients.forEach(this::addIngredient);
   }
 
   @Override
