@@ -14,7 +14,7 @@ public interface UserService {
 
   User signUp(User user);
 
-  User update(User user);
+  User update(User user, String newPassword);
 
   List<User> findAll();
 

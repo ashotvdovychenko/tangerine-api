@@ -15,6 +15,6 @@ public class UserUpdateDto {
   private String email;
 
   @Size(min = 6, max = 32, message = "Enter at least 6 and less than 32 characters")
-  private String password;
+  private String newPassword;
   private String phoneNumber;
 }

@@ -149,7 +149,7 @@ public class UserController {
                                         @PathVariable Long id, Principal principal) {
     return ResponseEntity.of(userService.findById(id)
         .map(user -> userMapper.partialUpdate(userDto, user))
-        .map(userService::update)
+        .map(user -> userService.update(user, userDto.getNewPassword()))
         .map(userMapper::toPayload));
   }
 

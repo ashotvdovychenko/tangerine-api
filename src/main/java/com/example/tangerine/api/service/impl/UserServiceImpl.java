@@ -69,12 +69,14 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @Transactional(isolation = Isolation.REPEATABLE_READ)
-  public User update(User user) {
+  public User update(User user, String newPassword) {
     if (isUsernameInUse(user)) {
       throw new UserAlreadyExistsException(
           "Username %s is already in use".formatted(user.getUsername()));
     }
-    user.setPassword(passwordEncoder.encode(user.getPassword()));
+    if (newPassword != null) {
+      user.setPassword(passwordEncoder.encode(user.getPassword()));
+    }
     return userRepository.save(user);
   }
 
