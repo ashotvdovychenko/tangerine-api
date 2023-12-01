@@ -38,10 +38,10 @@ public class Recipe {
   @Column(name = "name")
   private String name;
 
-  @Column(name = "description")
+  @Column(name = "description", length = 65535)
   private String description;
 
-  @Column(name = "seconds_duration")
+  @Column(name = "seconds_duration", columnDefinition = "TEXT")
   private Long secondsDuration;
 
   @Column(name = "products_cost")
